@@ -1,6 +1,7 @@
 import App from "./app";
 import { modelController } from "./controllers/Models/Model";
 import ModelRouter from "./controllers/Models/ModelRouter";
+import nms from "./services/streamService/serverstream";
 import { Claudinary, ENVIRONMENTS } from "./utils/const";
 import DontEnv from "dotenv";
 
@@ -17,3 +18,5 @@ app.description(ENVIRONMENTS.DESCRIPTION_APPLICATION);
 app.import(modelController, ModelRouter);
 
 app.init();
+
+nms.run();
