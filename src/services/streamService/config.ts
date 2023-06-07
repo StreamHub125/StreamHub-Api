@@ -1,6 +1,11 @@
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
 
 export const config = {
+  auth: {
+    api: true,
+    api_user: "streamhub_admin_stream",
+    api_pass: "adminSH231654",
+  },
   rtmp: {
     port: 1935,
     chunk_size: 60000,
