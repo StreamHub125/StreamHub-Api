@@ -54,8 +54,9 @@ export interface CLOUDINARYCONFIG {
 
 export interface ROUTESLOG {
   type: METHODS_HTTP;
-  plur: string;
+  plur: string | null;
   path: string;
+  plrs: boolean;
 }
 
 /* Typos Node Media Server */

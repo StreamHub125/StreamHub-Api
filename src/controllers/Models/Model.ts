@@ -14,15 +14,114 @@ export default class ModelController extends Controller<IModel, ModelService> {
   public readonly path: string = "/model";
 
   //Routes
-  public readonly pathGetModel: string = "/";
+  /* GETS */
+  public readonly pathGetModels: string = "/";
+  public readonly pathGetModelById: string = "/:id";
+  public readonly pathGetModelByVerificate: string = "/verificate";
+  public readonly pathGetModelByTag: string = "/:tag";
+  public readonly pathGetModelByLive: string = "/live";
+  public readonly pathGetModelByPopularity: string = "/popularity";
+  public readonly pathGetModelByPopularityTag: string = "/popularity/:tag";
+
+  /* POSTS */
+  public readonly pathPostModel: string = "/";
+
+  /* PUT */
+  public readonly pathPutModel: string = "/:id";
+  public readonly pathPutModelImageSale: string = "/image-sale/:id";
+  public readonly pathPutModelImageAvatar: string = "/avatar/:id";
+  public readonly pathPutModelImageVerificate: string = "/image-verificate/:id";
+  public readonly pathPutModelIsVerificate: string = "/is-verificate/:id";
+
+  /* DELETE */
+  public readonly pathDeleteModel: string = "/:id";
   //Finish Routes
 
   service: ModelService;
   routesLog: ROUTESLOG[] = [
     {
       type: METHODS_HTTP.GET,
-      plur: "", // Example "By ID"
-      path: this.pathGetModel,
+      plur: "By Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModels,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Id", // Example "By ID"
+      path: this.pathGetModelById,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Verificate Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModelByVerificate,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Tag Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModelByTag,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Live Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModelByLive,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Popularity Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModelByPopularity,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.GET,
+      plur: "By Popularity Tag Limit and page {url}?limit=5&page=1", // Example "By ID"
+      path: this.pathGetModelByPopularityTag,
+      plrs: true,
+    },
+    {
+      type: METHODS_HTTP.POST,
+      plur: "Receives Body type IModel", // Example "By ID"
+      path: this.pathPostModel,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      plur: "By id Receives Body type Omit<IModel, 'isVerificate'>", // Example "By ID"
+      path: this.pathPutModel,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      plur: "By id Receives Body type Avatar Image", // Example "By ID"
+      path: this.pathPutModelImageAvatar,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      plur: "By id Receives Body type {photo: file<Image>, price: number}", // Example "By ID"
+      path: this.pathPutModelImageSale,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      plur: "By id Receives Body type Verificate Image", // Example "By ID"
+      path: this.pathPutModelImageVerificate,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      plur: "By id and idAdmin and boolean 0 = true 1 = false", // Example "By ID"
+      path: this.pathPutModelIsVerificate,
+      plrs: false,
+    },
+    {
+      type: METHODS_HTTP.DELETE,
+      plur: "By id", // Example "By ID"
+      path: this.pathDeleteModel,
+      plrs: false,
     },
   ];
   loggerController: Logger;
@@ -37,22 +136,112 @@ export default class ModelController extends Controller<IModel, ModelService> {
     this.addInterceptor();
   }
 
-  // GET Model by id
-  // GET Models
-  // GET Models by Verificate
-  // GET Models by Tag
-  // GET Models by Live
-  // GET Models by Popularidad
-  // GET Models by Popularidad of Tag
-  // POST Model
-  // PUT Model by Filter
-  // PUT Model Update Images Com
-  // PUT Model Update Image Avatar
-  // PUT Model Update Image Verificate
-  // PUT Model Is Verificate
-  // DELETE Model by id
   @HttpMethods(false)
-  getModel(_input: InputHttpMethodsArgument): ReturnMethod {
+  getModels(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelById(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelByVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelByTag(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelByLive(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelByPopularity(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  getModelByPopularityTag(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  postModel(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  putModel(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  putModelImageSale(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  putModelImageAvatar(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  putModelImageVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  putModelIsVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+    return {
+      status: HTTP_RESPONSE.ACCEPTED,
+      response: "Recibido Daniel Campaz",
+    };
+  }
+
+  @HttpMethods(false)
+  deleteModel(_input: InputHttpMethodsArgument): ReturnMethod {
     return {
       status: HTTP_RESPONSE.ACCEPTED,
       response: "Recibido Daniel Campaz",
