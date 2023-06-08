@@ -3,6 +3,6 @@ import { modelController } from "./Model";
 
 const ModelRouter: Router = Router();
 
-ModelRouter.get(modelController.pathGetModels, modelController.getModels);
+ModelRouter.get(modelController.pathGetModel, modelController.getModel);
 
 export default ModelRouter;

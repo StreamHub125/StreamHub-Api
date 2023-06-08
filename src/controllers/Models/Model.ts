@@ -6,7 +6,7 @@ import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import { Logger } from "../../utils/Logger";
 import HttpMethods from "../../decorators/HttpMethods";
-import { InputHttpMethodsArgument, ReturnMethod } from "../../types";
+import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import ModelService from "../../services/ModelService";
 import { IModel } from "../../interfaces/IModel";
 
@@ -14,14 +14,15 @@ export default class ModelController extends Controller<IModel, ModelService> {
   public readonly path: string = "/model";
 
   //Routes
-  public readonly pathGetModels: string = "/";
+  public readonly pathGetModel: string = "/";
+  //Finish Routes
 
   service: ModelService;
-  routesLog: { type: METHODS_HTTP; plur: string; path: string }[] = [
+  routesLog: ROUTESLOG[] = [
     {
       type: METHODS_HTTP.GET,
-      plur: "",
-      path: this.pathGetModels,
+      plur: "", // Example "By ID"
+      path: this.pathGetModel,
     },
   ];
   loggerController: Logger;
@@ -36,8 +37,22 @@ export default class ModelController extends Controller<IModel, ModelService> {
     this.addInterceptor();
   }
 
+  // GET Model by id
+  // GET Models
+  // GET Models by Verificate
+  // GET Models by Tag
+  // GET Models by Live
+  // GET Models by Popularidad
+  // GET Models by Popularidad of Tag
+  // POST Model
+  // PUT Model by Filter
+  // PUT Model Update Images Com
+  // PUT Model Update Image Avatar
+  // PUT Model Update Image Verificate
+  // PUT Model Is Verificate
+  // DELETE Model by id
   @HttpMethods(false)
-  getModels(_input: InputHttpMethodsArgument): ReturnMethod {
+  getModel(_input: InputHttpMethodsArgument): ReturnMethod {
     return {
       status: HTTP_RESPONSE.ACCEPTED,
       response: "Recibido Daniel Campaz",

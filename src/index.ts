@@ -12,7 +12,6 @@ const app: App = new App(
   ENVIRONMENTS.PORT,
   `/api-v${ENVIRONMENTS.VERSION_APPLICATION}`
 );
-
 app.description(ENVIRONMENTS.DESCRIPTION_APPLICATION);
 
 app.import(modelController, ModelRouter);

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Logger } from "./class/Logger";
-import { HTTP_RESPONSE } from "./types.enum";
+import { HTTP_RESPONSE, METHODS_HTTP } from "./types.enum";
 
 export type Interceptor = (req: Request, res: Response, next: Function) => void;
 
@@ -52,9 +52,15 @@ export interface CLOUDINARYCONFIG {
   API_SECRET: string;
 }
 
+export interface ROUTESLOG {
+  type: METHODS_HTTP;
+  plur: string;
+  path: string;
+}
+
 /* Typos Node Media Server */
 
-interface Config {
+export interface Config {
   logType?: number;
   rtmp?: RtmpConfig;
   http?: HttpConfig;
@@ -65,7 +71,7 @@ interface Config {
   auth?: AuthConfig;
 }
 
-interface RtmpConfig {
+export interface RtmpConfig {
   port?: number;
   ssl?: SslConfig;
   chunk_size?: number;
@@ -74,19 +80,19 @@ interface RtmpConfig {
   ping_timeout?: number;
 }
 
-interface SslConfig {
+export interface SslConfig {
   key: string;
   cert: string;
   port?: number;
 }
 
-interface HttpConfig {
+export interface HttpConfig {
   mediaroot: string;
   port?: number;
   allow_origin?: string;
 }
 
-interface AuthConfig {
+export interface AuthConfig {
   play?: boolean;
   publish?: boolean;
   secret?: string;
@@ -96,22 +102,22 @@ interface AuthConfig {
 // api_user?: string;
 // api_pass?:string;
 
-interface TransConfig {
+export interface TransConfig {
   ffmpeg: string;
   tasks: TransTaskConfig[];
 }
 
-interface RelayConfig {
+export interface RelayConfig {
   tasks: RelayTaskConfig[];
   ffmpeg: string;
 }
 
-interface FissionConfig {
+export interface FissionConfig {
   ffmpeg: string;
   tasks: FissionTaskConfig[];
 }
 
-interface TransTaskConfig {
+export interface TransTaskConfig {
   app: string;
   hls?: boolean;
   hlsFlags?: string;
@@ -127,7 +133,7 @@ interface TransTaskConfig {
   mp4Flags?: string;
 }
 
-interface RelayTaskConfig {
+export interface RelayTaskConfig {
   app: string;
   name?: string;
   mode: string;
@@ -136,12 +142,12 @@ interface RelayTaskConfig {
   appendName?: boolean;
 }
 
-interface FissionTaskConfig {
+export interface FissionTaskConfig {
   rule: string;
   model: FissionTaskModel[];
 }
 
-interface FissionTaskModel {
+export interface FissionTaskModel {
   ab: string;
   vb: string;
   vs: string;

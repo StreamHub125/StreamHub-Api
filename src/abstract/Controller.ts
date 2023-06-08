@@ -3,12 +3,12 @@ import { pushInterceptor } from "../controllers/Interceptors";
 import { ILoggerChild } from "../interfaces/ILoggerChild";
 import { Logger } from "../utils/Logger";
 import { getUrlPath } from "../utils/const";
-import { METHODS_HTTP } from "../types.enum";
 import IService from "../interfaces/IService";
+import { ROUTESLOG } from "../types";
 
 export abstract class Controller<IType, TypeService extends IService<IType>> {
   abstract readonly path: string;
-  abstract routesLog: Array<{ type: METHODS_HTTP; plur: string; path: string }>;
+  abstract routesLog: Array<ROUTESLOG>;
   abstract loggerController: Logger;
   abstract service: TypeService;
 

@@ -37,7 +37,11 @@ export function getUrlPath(): string {
   if (ENVIRONMENTS.URL_NAME === "localhost") {
     return `localhost:${ENVIRONMENTS.PORT}${version}`;
   } else {
-    return `${ENVIRONMENTS.URL_NAME}${version}`;
+    if (process.env.NEED_PORT === "true") {
+      return `${ENVIRONMENTS.URL_NAME}:${ENVIRONMENTS.PORT}${version}`;
+    } else {
+      return `${ENVIRONMENTS.URL_NAME}${version}`;
+    }
   }
 }
 
