@@ -18,7 +18,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
   public readonly pathGetModels: string = "/";
   public readonly pathGetModelById: string = "/:id";
   public readonly pathGetModelByVerificate: string = "/verificate";
-  public readonly pathGetModelByTag: string = "/:tag";
+  public readonly pathGetModelByTag: string = "/tag/:tag";
   public readonly pathGetModelByLive: string = "/live";
   public readonly pathGetModelByPopularity: string = "/popularity";
   public readonly pathGetModelByPopularityTag: string = "/popularity/:tag";
@@ -26,14 +26,14 @@ export default class ModelController extends Controller<IModel, ModelService> {
   /* POSTS */
   public readonly pathPostModel: string = "/";
 
-  /* PUT */
+  /* PUTS */
   public readonly pathPutModel: string = "/:id";
   public readonly pathPutModelImageSale: string = "/image-sale/:id";
   public readonly pathPutModelImageAvatar: string = "/avatar/:id";
   public readonly pathPutModelImageVerificate: string = "/image-verificate/:id";
   public readonly pathPutModelIsVerificate: string = "/is-verificate/:id";
 
-  /* DELETE */
+  /* DELETES */
   public readonly pathDeleteModel: string = "/:id";
   //Finish Routes
 
@@ -148,7 +148,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
   getModelById(_input: InputHttpMethodsArgument): ReturnMethod {
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Recibido Daniel Campaz Id",
     };
   }
 
@@ -164,7 +164,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
   getModelByTag(_input: InputHttpMethodsArgument): ReturnMethod {
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Recibido Daniel Campaz Tag",
     };
   }
 

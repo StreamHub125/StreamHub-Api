@@ -10,7 +10,7 @@ export type InterceptorMethod = (
   next: Function,
   interceptorLogger: Logger,
   path: string
-) => void;
+) => void | Promise<void>;
 
 export interface ReturnMethod {
   status: HTTP_RESPONSE;

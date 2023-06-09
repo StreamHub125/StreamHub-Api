@@ -23,15 +23,19 @@ export abstract class Controller<IType, TypeService extends IService<IType>> {
   logRoutes(): void {
     const path = this.pathRemove();
     this.loggerController.Log(`${path} Routes: `);
-    this.routesLog.forEach((e) => {
-      let plur = e.plur === null ? "" : ` ${e.plur}`;
-      let PathPl = e.plrs ? `${path}'s` : path;
-      this.loggerController.Log(
-        `${e.type.toUpperCase()} ${PathPl}${plur}: ${getUrlPath()}${this.path}${
-          e.path
-        }`
-      );
-    });
+    if (this.routesLog.length === 0) {
+      this.loggerController.Log(`<<Not Routes In ${path}>>`);
+    } else {
+      this.routesLog.forEach((e) => {
+        let plur = e.plur === null ? "" : ` ${e.plur}`;
+        let PathPl = e.plrs ? `${path}'s` : path;
+        this.loggerController.Log(
+          `${e.type.toUpperCase()} ${PathPl}${plur}: ${getUrlPath()}${
+            this.path
+          }${e.path}`
+        );
+      });
+    }
     this.loggerController.Log(`Finish ${path} Routes: `);
   }
 
