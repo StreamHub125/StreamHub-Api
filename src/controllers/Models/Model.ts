@@ -31,7 +31,8 @@ export default class ModelController extends Controller<IModel, ModelService> {
   public readonly pathPutModelImageSale: string = "/image-sale/:id";
   public readonly pathPutModelImageAvatar: string = "/avatar/:id";
   public readonly pathPutModelImageVerificate: string = "/image-verificate/:id";
-  public readonly pathPutModelIsVerificate: string = "/is-verificate/:id";
+  public readonly pathPutModelIsVerificate: string =
+    "/is-verificate/:idAdmin/:id/:isV";
 
   /* DELETES */
   public readonly pathDeleteModel: string = "/:id";

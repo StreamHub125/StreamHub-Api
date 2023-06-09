@@ -12,6 +12,7 @@ export interface IModel extends IUserWAvatar {
   verificatePhoto?: string;
   gender: string;
   tag: string;
+  secret_key: string;
 }
 
 export interface IModelM extends Omit<IModel, "fn"> {}
@@ -43,6 +44,10 @@ export const IModelSchema = {
     required: true,
   },
   tag: {
+    type: String,
+    required: true,
+  },
+  secret_key: {
     type: String,
     required: true,
   },
