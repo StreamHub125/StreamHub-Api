@@ -5,7 +5,7 @@ import { Controller } from "../../abstract/Controller";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
-import { EnumColorLogger, HTTP_RESPONSE } from "../../types.enum";
+import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { IModerator } from "../../interfaces/IModerator";
 import ModeratorService from "../../services/ModeratorService";
@@ -19,10 +19,10 @@ export default class ModeratorController extends Controller<
   /* GET */
   public readonly pathGetModerators = "/:idAdmin";
   public readonly pathGetModeratorById = "/:id";
-  public readonly pathGetModeratorByVerificate: string = "/verificate";
+  public readonly pathGetModeratorByVerificate: string = "/verificate/:idAdmin";
 
   /* POST */
-  public readonly pathPostModerator = "/";
+  public readonly pathPostModerator = "/:idAdmin";
 
   /* PUT */
   public readonly pathPutModerator = "/:id";
@@ -33,7 +33,63 @@ export default class ModeratorController extends Controller<
   /* DELETE */
   public readonly pathDeleteModerator = "/:id";
 
-  routesLog: ROUTESLOG[] = [];
+  routesLog: ROUTESLOG[] = [
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetModerators,
+      plrs: false,
+      plur: "Get Moderators need Admin Id",
+    },
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetModeratorById,
+      plrs: false,
+      plur: "Get Moderators by Id",
+    },
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetModeratorByVerificate,
+      plrs: false,
+      plur: "Get Moderators by Verifycate",
+    },
+    {
+      type: METHODS_HTTP.POST,
+      path: this.pathPostModerator,
+      plrs: false,
+      plur: "Get Moderators need Admin Id for Create",
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      path: this.pathPutModerator,
+      plrs: false,
+      plur: "PUT Moderators need a Id for Update",
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      path: this.pathPutModeratorVerify,
+      plrs: false,
+      plur: "PUT Moderators need Admin Id and Id Moderator for Verificated",
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      path: this.pathPutModeratorAddModel,
+      plrs: false,
+      plur: "PUT Moderators need Admin Id and Id Moderator for Add Model to moderate",
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      path: this.pathPutModeratorImageVerificate,
+      plrs: false,
+      plur: "PUT Moderators need Id Moderator for upload image verificated",
+    },
+    {
+      type: METHODS_HTTP.DELETE,
+      path: this.pathDeleteModerator,
+      plrs: false,
+      plur: "Need a Moderator Id for Delete a Moderate",
+    },
+  ];
+
   loggerController: Logger;
   service: ModeratorService;
   constructor() {

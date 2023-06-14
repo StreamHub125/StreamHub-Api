@@ -7,6 +7,8 @@ import { genderController } from "./controllers/Gender/Gender";
 import genderRouter from "./controllers/Gender/GenderRouter";
 import { modelController } from "./controllers/Models/Model";
 import ModelRouter from "./controllers/Models/ModelRouter";
+import { moderatorController } from "./controllers/Moderator/Moderator";
+import ModeratorRouter from "./controllers/Moderator/ModeratorRouter";
 import { moderatorsModelsController } from "./controllers/Moderators-Models/Moderators-Models";
 import ModeratorsModelRouter from "./controllers/Moderators-Models/Moderators-ModelsRouter";
 import { tagController } from "./controllers/Tag/Tag";
@@ -38,6 +40,8 @@ app.import(tagController, TagRouter);
 app.import(viewerController, ViewerRouter);
 // Moderator Controller import
 app.import(modelController, ModelRouter);
+// Moderator Controller Import
+app.import(moderatorController, ModeratorRouter);
 // Follow Controller Import
 app.import(followController, FollowRouter);
 // Moderators Models Controller Import

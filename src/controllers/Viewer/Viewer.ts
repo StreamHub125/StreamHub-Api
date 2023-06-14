@@ -5,7 +5,7 @@ import { Controller } from "../../abstract/Controller";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
-import { EnumColorLogger, HTTP_RESPONSE } from "../../types.enum";
+import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import { IViewer } from "../../interfaces/IViewer";
 import ViewerService from "../../services/ViewerService";
 import HttpMethods from "../../decorators/HttpMethods";
@@ -29,7 +29,38 @@ export default class ViewerController extends Controller<
   /* DELETE */
   public readonly pathDeleteViewer = "/:id";
 
-  routesLog: ROUTESLOG[] = [];
+  routesLog: ROUTESLOG[] = [
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetViewers,
+      plrs: true,
+      plur: "GET all Viewers need id Admin ",
+    },
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetViewerById,
+      plrs: false,
+      plur: "GET all Viewers need id Viewer ",
+    },
+    {
+      type: METHODS_HTTP.POST,
+      path: this.pathPostViewer,
+      plrs: false,
+      plur: "POST need a Viewer Element",
+    },
+    {
+      type: METHODS_HTTP.PUT,
+      path: this.pathPutViewer,
+      plrs: false,
+      plur: "PUT Viewer need Id Viewer and element to update",
+    },
+    {
+      type: METHODS_HTTP.DELETE,
+      path: this.pathDeleteViewer,
+      plrs: false,
+      plur: "DELETE Viewer need Id Viewer",
+    },
+  ];
   loggerController: Logger;
   service: ViewerService;
   constructor() {

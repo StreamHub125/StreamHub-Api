@@ -5,7 +5,7 @@ import { Controller } from "../../abstract/Controller";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
-import { EnumColorLogger, HTTP_RESPONSE } from "../../types.enum";
+import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { IFollow } from "../../interfaces/IFollow";
 import FollowService from "../../services/FollowService";
@@ -26,7 +26,32 @@ export default class FollowController extends Controller<
   /* DELETE */
   public readonly pathDeleteUnsubscribe = "/unsubscribe/:idModel/:idViewer";
 
-  routesLog: ROUTESLOG[] = [];
+  routesLog: ROUTESLOG[] = [
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetFollowModel,
+      plrs: false,
+      plur: "Get Subscribe in the Model required Param idModel",
+    },
+    {
+      type: METHODS_HTTP.GET,
+      path: this.pathGetFollowViewer,
+      plrs: false,
+      plur: "Get Subscribe in the Viewer required Param idViewer",
+    },
+    {
+      type: METHODS_HTTP.POST,
+      path: this.pathPostSubscribe,
+      plrs: false,
+      plur: "Need a Model Id and Viewer Id for Create a Follow",
+    },
+    {
+      type: METHODS_HTTP.DELETE,
+      path: this.pathDeleteUnsubscribe,
+      plrs: false,
+      plur: "Need a Model Id and Viewer Id for Delete a Follow",
+    },
+  ];
   loggerController: Logger;
   service: FollowService;
   constructor() {
