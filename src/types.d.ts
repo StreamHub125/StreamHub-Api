@@ -14,23 +14,26 @@ export type InterceptorMethod = (
 
 export interface ReturnMethod {
   status: HTTP_RESPONSE;
-  response: Object | string | number;
+  response: Object | string | number | null;
 }
 
 export interface InputHttpMethodsArgument {
   body: any;
   params: any;
+  query: any;
 }
 
 export interface InputHttpMethodsArgumentFile {
   body: any;
   params: any;
+  query: any;
   file: any;
 }
 
 export interface InputHttpMethodsArgumentFiles {
   body: any;
   params: any;
+  query: any;
   files: any;
 }
 

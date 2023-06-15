@@ -11,6 +11,17 @@ export interface IUserWAvatar extends IUser {
   avatar?: string;
 }
 
+export const keysOfIUser = [
+  "name",
+  "lastname",
+  "username",
+  "email",
+  "password",
+  "cc",
+];
+
+export const keysOfIUserWAvatar = [...keysOfIUser, "avatar"];
+
 export const IUserSchema = {
   name: {
     type: String,

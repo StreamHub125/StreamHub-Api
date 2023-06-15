@@ -1,21 +1,59 @@
+import md5 from "md5";
 import { IAdmin } from "../interfaces/IAdmin";
 import IService from "../interfaces/IService";
+import AdminSchema from "../schemas/Admin";
 
 export default class AdminService implements IService<IAdmin> {
   constructor() {}
-  Create(_item: IAdmin): Promise<IAdmin> {
-    throw new Error("Method not implemented.");
+  async Create(item: IAdmin): Promise<IAdmin> {
+    const admin: IAdmin = {
+      ...item,
+      password: md5(item.password),
+    };
+
+    const newAdmin = new AdminSchema(admin);
+    const adminCreate = await newAdmin.save();
+
+    return adminCreate;
   }
-  Update(_filter: object, _update: object): Promise<IAdmin> {
-    throw new Error("Method not implemented.");
+  async Update(filter: object, update: object): Promise<IAdmin | null> {
+    try {
+      const admin = await AdminSchema.findOneAndUpdate(filter, update);
+      return admin;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Updates(filter: object, _update: object): Promise<IAdmin | null> {
+    try {
+      const admin = await AdminSchema.findOne(filter);
+      return admin;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<IAdmin[] | null> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any> {
+    try {
+      const adminDelete = await AdminSchema.findOneAndRemove({ _id: id });
+      return adminDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<IAdmin | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const admin = await AdminSchema.paginate(query, set);
+      return admin;
+    } catch (error) {
+      return null;
+    }
+  }
+  async FindById(id: string): Promise<IAdmin | null> {
+    try {
+      const admin = await AdminSchema.findById(id);
+      return admin;
+    } catch (error) {
+      return null;
+    }
   }
 }

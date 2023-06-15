@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { IUser, IUserSchema } from "./IUser";
+import { IUser, IUserSchema, keysOfIUser } from "./IUser";
 
 export interface IAdmin extends IUser {
   permissions: number;
@@ -15,3 +15,5 @@ export const IAdminSchema = {
     default: 0,
   },
 };
+
+export const keysOfAdmin = [...keysOfIUser, "permissions"];

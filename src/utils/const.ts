@@ -1,4 +1,6 @@
-import { ENVIRONMENTSTYPES } from "../types";
+import IService from "../interfaces/IService";
+import { ENVIRONMENTSTYPES, ReturnMethod } from "../types";
+import { HTTP_RESPONSE } from "../types.enum";
 import settings from "./json/stettings.json";
 import CloudinaryIm from "cloudinary";
 import DontEnv from "dotenv";
@@ -65,3 +67,18 @@ export const ERROR = (message: string | number | object): Object => {
     error: message,
   };
 };
+
+export async function VerifyID<T, Type extends IService<T>>(
+  id: string,
+  service: Type,
+  type: string
+): Promise<ReturnMethod | null> {
+  const idObject = await service.FindById(id);
+  if (idObject === null) {
+    return {
+      status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      response: `No ${type} with this id`,
+    };
+  }
+  return null;
+}
