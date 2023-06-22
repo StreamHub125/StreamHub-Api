@@ -1,20 +1,51 @@
 import { IGender } from "../interfaces/IGender";
 import IService from "../interfaces/IService";
+import GenderSchema from "../schemas/Gender";
 
 export default class GenderService implements IService<IGender> {
-  Create(_item: IGender): Promise<IGender> {
-    throw new Error("Method not implemented.");
+  async Create(item: IGender): Promise<IGender> {
+    const gender: IGender = {
+      ...item,
+    };
+
+    const newGender = new GenderSchema(gender);
+    const genderCreate = await newGender.save();
+
+    return genderCreate;
   }
-  Update(_filter: object, _update: object): Promise<IGender> {
-    throw new Error("Method not implemented.");
+  async Update(
+    filter: object,
+    update: Partial<IGender>
+  ): Promise<IGender | null> {
+    try {
+      const gender = await GenderSchema.findOneAndUpdate(filter, update);
+      return gender;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any> {
+    try {
+      const genderDelete = await GenderSchema.findOneAndRemove({ _id: id });
+      return genderDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<IGender | null> {
-    throw new Error("Method not implemented.");
+  async FindById(id: string): Promise<IGender | null> {
+    try {
+      const gender = await GenderSchema.findById(id);
+      return gender;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<IGender[] | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const gender = await GenderSchema.paginate(query, set);
+      return gender;
+    } catch (error) {
+      return null;
+    }
   }
 }

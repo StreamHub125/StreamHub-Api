@@ -18,3 +18,5 @@ export const ITagSchema = {
     required: false,
   },
 };
+
+export const keysOfITag = ["tagName", "tagDescription"];

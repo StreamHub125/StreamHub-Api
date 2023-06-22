@@ -88,7 +88,6 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     const adminVerify = await VerifyID(idAdmin, service, "Admin");
     if (adminVerify !== null) return adminVerify;
     const querr = ConvertObj(keysOfAdmin, input.body);
-    console.log(querr);
     const admins = await service.Find(querr, {
       limit,
       page,

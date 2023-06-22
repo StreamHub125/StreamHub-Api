@@ -18,3 +18,5 @@ export const IModeratorsModelsSchema = {
     required: true,
   },
 };
+
+export const keysOfIModeratorsModels = ["idModerator", "idModel"];

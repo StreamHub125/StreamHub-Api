@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { IUser, IUserSchema } from "./IUser";
+import { IUser, IUserSchema, keysOfIUser } from "./IUser";
 
 export interface IModerator extends IUser {
   models: string[];
@@ -25,3 +25,10 @@ export const IModeratorSchema = {
     required: false,
   },
 };
+
+export const keysOfIModerator = [
+  ...keysOfIUser,
+  "permissions",
+  "isVerificate",
+  "verificatePhoto",
+];

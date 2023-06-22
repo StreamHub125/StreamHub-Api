@@ -18,3 +18,5 @@ export const IGenderSchema = {
     required: false,
   },
 };
+
+export const keysOfIFollow = ["genderName", "genderDescription"];

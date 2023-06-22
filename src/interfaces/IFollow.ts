@@ -18,3 +18,5 @@ export const IFollowSchema = {
     required: true,
   },
 };
+
+export const keysOfIFollow = ["idViewer", "idModel"];

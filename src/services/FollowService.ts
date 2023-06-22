@@ -1,20 +1,51 @@
 import { IFollow } from "../interfaces/IFollow";
 import IService from "../interfaces/IService";
+import FollowSchema from "../schemas/Follow";
 
 export default class FollowService implements IService<IFollow> {
-  Create(_item: IFollow): Promise<IFollow> {
-    throw new Error("Method not implemented.");
+  async Create(item: IFollow): Promise<IFollow> {
+    const follow: IFollow = {
+      ...item,
+    };
+
+    const newFollow = new FollowSchema(follow);
+    const followCreate = await newFollow.save();
+
+    return followCreate;
   }
-  Update(_filter: object, _update: object): Promise<IFollow> {
-    throw new Error("Method not implemented.");
+  async Update(
+    filter: object,
+    update: Partial<IFollow>
+  ): Promise<IFollow | null> {
+    try {
+      const follow = await FollowSchema.findOneAndUpdate(filter, update);
+      return follow;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any | null> {
+    try {
+      const followDelete = await FollowSchema.findOneAndRemove({ _id: id });
+      return followDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<IFollow | null> {
-    throw new Error("Method not implemented.");
+  async FindById(id: string): Promise<IFollow | null> {
+    try {
+      const follow = await FollowSchema.findById(id);
+      return follow;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<IFollow[] | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const follow = await FollowSchema.paginate(query, set);
+      return follow;
+    } catch (error) {
+      return null;
+    }
   }
 }

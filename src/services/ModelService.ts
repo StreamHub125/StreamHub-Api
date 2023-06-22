@@ -1,21 +1,49 @@
 import { IModel } from "../interfaces/IModel";
 import IService from "../interfaces/IService";
+import ModelSchema from "../schemas/Model";
 
 export default class ModelService implements IService<IModel> {
   constructor() {}
-  Create(_item: IModel): Promise<IModel> {
-    throw new Error("Method not implemented.");
+  async Create(item: IModel): Promise<IModel> {
+    const model: IModel = {
+      ...item,
+    };
+
+    const newModel = new ModelSchema(model);
+    const modelCreate = await newModel.save();
+
+    return modelCreate;
   }
-  Update(_filter: object, _update: object): Promise<IModel> {
-    throw new Error("Method not implemented.");
+  async Update(filter: object, update: object): Promise<IModel | null> {
+    try {
+      const model = await ModelSchema.findOneAndUpdate(filter, update);
+      return model;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any> {
+    try {
+      const followDelete = await ModelSchema.findOneAndRemove({ _id: id });
+      return followDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<IModel[] | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const model = await ModelSchema.paginate(query, set);
+      return model;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<IModel | null> {
-    throw new Error("Method not implemented.");
+  async FindById(id: string): Promise<IModel | null> {
+    try {
+      const model = await ModelSchema.findById(id);
+      return model;
+    } catch (error) {
+      return null;
+    }
   }
 }

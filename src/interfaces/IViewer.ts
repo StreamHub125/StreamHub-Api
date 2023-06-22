@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { IUser, IUserSchema } from "./IUser";
+import { IUser, IUserSchema, keysOfIUser } from "./IUser";
 
 export interface IViewer extends IUser {}
 
@@ -9,3 +9,5 @@ export interface IViewerModel extends Document, IViewerM {}
 export const IViewerSchema = {
   ...IUserSchema,
 };
+
+export const keysOfITag = [...keysOfIUser];

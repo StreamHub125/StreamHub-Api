@@ -3,10 +3,13 @@ import {
   IModeratorsModelsModel,
   IModeratorsModelsSchema,
 } from "../interfaces/IModerators-Models";
+import MongoosePaginate from "mongoose-paginate-v2";
 
 const moderatorsModelsSchema: Schema = new Schema(IModeratorsModelsSchema, {
   timestamps: true,
 });
+
+moderatorsModelsSchema.plugin(MongoosePaginate);
 
 export default model<
   IModeratorsModelsModel,

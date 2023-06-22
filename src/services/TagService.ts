@@ -1,20 +1,48 @@
 import IService from "../interfaces/IService";
 import { ITag } from "../interfaces/ITag";
+import TagSchema from "../schemas/Tag";
 
 export default class TagService implements IService<ITag> {
-  Create(_item: ITag): Promise<ITag> {
-    throw new Error("Method not implemented.");
+  async Create(item: ITag): Promise<ITag> {
+    const tag: ITag = {
+      ...item,
+    };
+
+    const newTag = new TagSchema(tag);
+    const tagCreate = await newTag.save();
+
+    return tagCreate;
   }
-  Update(_filter: object, _update: object): Promise<ITag> {
-    throw new Error("Method not implemented.");
+  async Update(filter: object, update: object): Promise<ITag | null> {
+    try {
+      const tag = await TagSchema.findOneAndUpdate(filter, update);
+      return tag;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any> {
+    try {
+      const tagDelete = await TagSchema.findOneAndRemove({ _id: id });
+      return tagDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<ITag | null> {
-    throw new Error("Method not implemented.");
+  async FindById(id: string): Promise<ITag | null> {
+    try {
+      const tag = await TagSchema.findById(id);
+      return tag;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<ITag[] | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const tag = await TagSchema.paginate(query, set);
+      return tag;
+    } catch (error) {
+      return null;
+    }
   }
 }

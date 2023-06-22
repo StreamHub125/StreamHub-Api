@@ -1,5 +1,10 @@
 import { Document } from "mongoose";
-import { IUserSchemaWAvatar, IUserWAvatar } from "./IUser";
+import {
+  IUserSchemaWAvatar,
+  IUserWAvatar,
+  keysOfIUser,
+  keysOfIUserWAvatar,
+} from "./IUser";
 
 export interface IModel extends IUserWAvatar {
   photos: {
@@ -52,3 +57,13 @@ export const IModelSchema = {
     required: true,
   },
 };
+
+export const keysOfIModel = [
+  ...keysOfIUserWAvatar,
+  "photos",
+  "isVerificate",
+  "verificatePhoto",
+  "gender",
+  "tag",
+  "secret_key",
+];

@@ -1,21 +1,51 @@
 import { IModerator } from "../interfaces/IModerator";
 import IService from "../interfaces/IService";
+import ModeratorSchema from "../schemas/Moderator";
 
 export default class ModeratorService implements IService<IModerator> {
   constructor() {}
-  Create(_item: IModerator): Promise<IModerator> {
-    throw new Error("Method not implemented.");
+  async Create(item: IModerator): Promise<IModerator> {
+    const moderator: IModerator = {
+      ...item,
+    };
+
+    const newModerator = new ModeratorSchema(moderator);
+    const moderatorCreate = await newModerator.save();
+
+    return moderatorCreate;
   }
-  Update(_filter: object, _update: object): Promise<IModerator> {
-    throw new Error("Method not implemented.");
+  async Update(filter: object, update: object): Promise<IModerator | null> {
+    try {
+      const moderator = await ModeratorSchema.findOneAndUpdate(filter, update);
+      return moderator;
+    } catch (error) {
+      return null;
+    }
   }
-  Delete(_id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async Delete(id: string): Promise<any> {
+    try {
+      const moderatorDelete = await ModeratorSchema.findOneAndRemove({
+        _id: id,
+      });
+      return moderatorDelete;
+    } catch (error) {
+      return null;
+    }
   }
-  FindById(_id: string): Promise<IModerator | null> {
-    throw new Error("Method not implemented.");
+  async FindById(id: string): Promise<IModerator | null> {
+    try {
+      const moderator = await ModeratorSchema.findById(id);
+      return moderator;
+    } catch (error) {
+      return null;
+    }
   }
-  Find(): Promise<IModerator[] | null> {
-    throw new Error("Method not implemented.");
+  async Find(query: object, set: object): Promise<any | null> {
+    try {
+      const moderator = await ModeratorSchema.paginate(query, set);
+      return moderator;
+    } catch (error) {
+      return null;
+    }
   }
 }
