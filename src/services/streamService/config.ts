@@ -1,20 +1,23 @@
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
+import DontEnv from "dotenv";
+
+DontEnv.config();
 
 export const config = {
   auth: {
     api: true,
-    api_user: "streamhub_admin_stream",
-    api_pass: "adminSH231654",
+    api_user: process.env.STREAM_USER || "stream",
+    api_pass: process.env.STREAM_PASSWORD || "admin1234",
   },
   rtmp: {
-    port: 1935,
+    port: process.env.MEDIA_SERVER_PORT || 1935,
     chunk_size: 60000,
     gop_cache: true,
     ping: 30,
     ping_timeout: 60,
   },
   http: {
-    port: 8000,
+    port: process.env.MEDIA_SERVER_PORT || 8000,
     mediaroot: "../media",
     allow_origin: "*",
   },
