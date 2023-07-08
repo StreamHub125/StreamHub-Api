@@ -48,4 +48,12 @@ export default class FollowService implements IService<IFollow> {
       return null;
     }
   }
+  async FindS(query: object): Promise<any | null> {
+    try {
+      const follow = await FollowSchema.find(query).exec();
+      return follow;
+    } catch (error) {
+      return null;
+    }
+  }
 }

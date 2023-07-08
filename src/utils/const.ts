@@ -1,4 +1,8 @@
 import IService from "../interfaces/IService";
+import AdminService from "../services/AdminService";
+import ModelService from "../services/ModelService";
+import ModeratorService from "../services/ModeratorService";
+import ViewerService from "../services/ViewerService";
 import { ENVIRONMENTSTYPES, ReturnMethod } from "../types";
 import { HTTP_RESPONSE } from "../types.enum";
 import settings from "./json/stettings.json";
@@ -81,4 +85,55 @@ export async function VerifyID<T, Type extends IService<T>>(
     };
   }
   return null;
+}
+
+export async function VerifyIDOFUser(
+  id: string,
+  service: string
+): Promise<ReturnMethod | null> {
+  const listService = {
+    admin: new AdminService(),
+    model: new ModelService(),
+    moderator: new ModeratorService(),
+    viewer: new ViewerService(),
+  };
+
+  switch (service) {
+    case "admin":
+      return await VerifyID(id, listService.admin, "Admin");
+
+    case "model":
+      return await VerifyID(id, listService.model, "Model");
+
+    case "moderator": //moderator
+      return await VerifyID(id, listService.moderator, "Moderator");
+
+    case "viewer":
+      return await VerifyID(id, listService.viewer, "Viewer");
+
+    default:
+      return null;
+  }
+}
+
+export function hasNextPaginate(
+  obj: any,
+  path: string, //  /model/${id}
+  url: string,
+  limit: number,
+  page: number
+): any {
+  if (obj.hasPrevPage) {
+    obj.prevPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
+      page - 1
+    }`;
+  }
+
+  if (obj.hasNextPage) {
+    obj.nextPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
+      page + 1
+    }`;
+  }
+
+  return obj;
 }

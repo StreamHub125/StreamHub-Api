@@ -9,6 +9,9 @@ import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { IFollow } from "../../interfaces/IFollow";
 import FollowService from "../../services/FollowService";
+import { VerifyID, getUrlPath } from "../../utils/const";
+import ViewerService from "../../services/ViewerService";
+import ModelService from "../../services/ModelService";
 
 export default class FollowController extends Controller<
   IFollow,
@@ -17,8 +20,8 @@ export default class FollowController extends Controller<
   public readonly path: string = "/follow";
 
   /* GET */
-  public readonly pathGetFollowModel = "/:idModel";
-  public readonly pathGetFollowViewer = "/:idViewer";
+  public readonly pathGetFollowModel = "/model/:idModel";
+  public readonly pathGetFollowViewer = "/viewer/:idViewer";
 
   /* POST */
   public readonly pathPostSubscribe = "/subscribe/:idModel/:idViewer";
@@ -61,35 +64,174 @@ export default class FollowController extends Controller<
     this.addInterceptor();
   }
 
-  @HttpMethods(false)
-  getFollowModel(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getFollowModel({
+    params,
+    query,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new FollowService();
+    const { idModel } = params;
+    const limit = parseInt(query.limit) || 10;
+    const page = parseInt(query.page) || 1;
+    const modelVerify = await VerifyID(idModel, new ModelService(), "Model");
+    if (modelVerify !== null) return modelVerify;
+    const follows = await service.Find(
+      { idModel },
+      {
+        limit,
+        page,
+      }
+    );
+
+    if (follows.hasPrevPage) {
+      follows.prevPage = `${getUrlPath()}${
+        this.path
+      }/model/${idModel}?limit=${limit}&page=${page - 1}`;
+    }
+
+    if (follows.hasNextPage) {
+      follows.nextPage = `${getUrlPath()}${
+        this.path
+      }/model/${idModel}?limit=${limit}&page=${page + 1}`;
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: follows,
     };
   }
 
-  @HttpMethods(false)
-  getFollowViewer(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getFollowViewer({
+    params,
+    query,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new FollowService();
+    const { idViewer } = params;
+    const limit = parseInt(query.limit) || 10;
+    const page = parseInt(query.page) || 1;
+    const viewerVerify = await VerifyID(
+      idViewer,
+      new ViewerService(),
+      "Viewer"
+    );
+    if (viewerVerify !== null) return viewerVerify;
+    const follows = await service.Find(
+      { idViewer },
+      {
+        limit,
+        page,
+      }
+    );
+
+    if (follows.hasPrevPage) {
+      follows.prevPage = `${getUrlPath()}${
+        this.path
+      }/viewer/${idViewer}?limit=${limit}&page=${page - 1}`;
+    }
+
+    if (follows.hasNextPage) {
+      follows.nextPage = `${getUrlPath()}${
+        this.path
+      }/viewer/${idViewer}?limit=${limit}&page=${page + 1}`;
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: follows,
     };
   }
 
-  @HttpMethods(false)
-  postSubscribe(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async postSubscribe({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idModel, idViewer } = params;
+
+    const viewerVerify = await VerifyID(
+      idViewer,
+      new ViewerService(),
+      "Viewer"
+    );
+    const modelVerify = await VerifyID(idModel, new ModelService(), "Model");
+    let vr: ReturnMethod | null = null;
+    if (viewerVerify !== null) {
+      vr = viewerVerify;
+    }
+
+    if (modelVerify !== null) {
+      if (vr !== null) {
+        vr.response = `${vr.response} and ${modelVerify.response}`;
+      } else {
+        vr = modelVerify;
+      }
+    }
+
+    if (vr !== null) {
+      return vr;
+    }
+
+    const service = new FollowService();
+
+    await service.Create({
+      idModel,
+      idViewer,
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: "Subscribed",
     };
   }
 
-  @HttpMethods(false)
-  deleteUnsubscribe(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async deleteUnsubscribe({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idModel, idViewer } = params;
+
+    const viewerVerify = await VerifyID(
+      idViewer,
+      new ViewerService(),
+      "Viewer"
+    );
+    const modelVerify = await VerifyID(idModel, new ModelService(), "Model");
+    let vr: ReturnMethod | null = null;
+    if (viewerVerify !== null) {
+      vr = viewerVerify;
+    }
+
+    if (modelVerify !== null) {
+      if (vr !== null) {
+        vr.response = `${vr.response} and ${modelVerify.response}`;
+      } else {
+        vr = modelVerify;
+      }
+    }
+
+    if (vr !== null) {
+      return vr;
+    }
+
+    const service = new FollowService();
+    const followSystem = await service.FindS({ idModel, idViewer });
+    if (followSystem === null || followSystem === undefined)
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Error Find by idModel and idViewer",
+      };
+
+    if (followSystem._id) {
+      await service.Delete(followSystem._id);
+      return {
+        status: HTTP_RESPONSE.ACCEPTED,
+        response: "UnSubscribed",
+      };
+    }
+
     return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      status: HTTP_RESPONSE.NO_CONTENT,
+      response: "Error Find by idModel and idViewer in Id",
     };
   }
 
@@ -101,7 +243,7 @@ export default class FollowController extends Controller<
     path: string
   ): void {
     interceptorLogger.LogChild(
-      "Viewer-controller",
+      "Follow-controller",
       `Interceptor of ${path.toUpperCase()}`
     );
     next();

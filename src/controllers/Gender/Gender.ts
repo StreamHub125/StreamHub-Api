@@ -2,13 +2,16 @@ import { Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { Controller } from "../../abstract/Controller";
-import { IGender } from "../../interfaces/IGender";
+import { IGender, keysOfIGender } from "../../interfaces/IGender";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import GenderService from "../../services/GenderService";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
+import { VerifyID, hasNextPaginate } from "../../utils/const";
+import AdminService from "../../services/AdminService";
+import { ConvertObj } from "../../utils/ConvertObj";
 
 export default class GenderController extends Controller<
   IGender,
@@ -34,31 +37,31 @@ export default class GenderController extends Controller<
       type: METHODS_HTTP.GET,
       path: this.pathGetGenders,
       plrs: true,
-      plur: "",
+      plur: "GET all Gender ",
     },
     {
       type: METHODS_HTTP.GET,
       path: this.pathGetGenderById,
       plrs: false,
-      plur: "",
+      plur: "GET Gender by Id",
     },
     {
       type: METHODS_HTTP.POST,
       path: this.pathPostGender,
       plrs: false,
-      plur: "Need a Admin Id for Create a Gender",
+      plur: "POST Need a Admin Id for Create a Gender",
     },
     {
       type: METHODS_HTTP.PUT,
       path: this.pathPutGenderById,
       plrs: false,
-      plur: "Need a Admin Id for Update a Gender",
+      plur: "PUT Need a Admin Id for Update a Gender and id of Gender to Updating",
     },
     {
       type: METHODS_HTTP.DELETE,
       path: this.pathDeleteGenderById,
       plrs: false,
-      plur: "Need a Admin Id for Delete a Gender",
+      plur: "DELETE Need a Admin Id for Delete a Gender and id of Gender to Deleting",
     },
   ];
 
@@ -71,43 +74,132 @@ export default class GenderController extends Controller<
     this.addInterceptor();
   }
 
-  @HttpMethods(false)
-  getGenders(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getGenders({ query }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new GenderService();
+    const limit = parseInt(query.limit) || 10;
+    const page = parseInt(query.page) || 1;
+    const genders = await service.Find(
+      {},
+      {
+        limit,
+        page,
+      }
+    );
+
+    const genderHNHA = hasNextPaginate(genders, this.path, "/", limit, page);
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: genderHNHA,
     };
   }
 
-  @HttpMethods(false)
-  getGenderById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getGenderById({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new GenderService();
+    const { id } = params;
+    const gender = await service.FindById(id);
+
+    if (gender === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Gender By This ID = ${id}`,
+      };
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: gender,
     };
   }
 
-  @HttpMethods(false)
-  postGender(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async postGender({
+    params,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin } = params;
+
+    const verifyAdmin = await VerifyID(idAdmin, new AdminService(), "Admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+
+    const verifyBody = ConvertObj(keysOfIGender, body);
+
+    if (Object.keys(verifyBody).length === 0) {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response:
+          "Data in body not is the type Gender type please Verify you request",
+      };
+    }
+
+    const service = new GenderService();
+    const genderCreate = await service.Create(verifyBody as IGender);
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: genderCreate,
     };
   }
 
-  @HttpMethods(false)
-  putGenderById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async putGenderById({
+    params,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin, id } = params;
+
+    const verifyAdmin = await VerifyID(idAdmin, new AdminService(), "Admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+    const verifyBody = ConvertObj(keysOfIGender, body);
+
+    if (Object.keys(verifyBody).length === 0) {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response:
+          "Data in body not is the type Gender type please Verify you request",
+      };
+    }
+
+    const service = new GenderService();
+    const genderUpdate = await service.Update({ _id: id }, verifyBody);
+
+    if (genderUpdate === null)
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Gender by this Id ${id}`,
+      };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: genderUpdate,
     };
   }
 
-  @HttpMethods(false)
-  deleteGenderById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async deleteGenderById({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin, id } = params;
+
+    const verifyAdmin = await VerifyID(idAdmin, new AdminService(), "Admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+
+    const service = new GenderService();
+    const genderUpdate = await service.Delete(id);
+
+    if (genderUpdate === null)
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Gender by this Id ${id}`,
+      };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: genderUpdate,
     };
   }
 

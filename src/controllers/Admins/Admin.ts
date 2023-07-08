@@ -79,12 +79,12 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     this.addInterceptor();
   }
 
-  @HttpMethods(true)
+  @HttpMethods()
   async getAdmins(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new AdminService();
     const { idAdmin } = input.params;
-    const limit = input.query.limit || 10;
-    const page = input.query.page || 1;
+    const limit = parseInt(input.query.limit) || 10;
+    const page = parseInt(input.query.page) || 1;
     const adminVerify = await VerifyID(idAdmin, service, "Admin");
     if (adminVerify !== null) return adminVerify;
     const querr = ConvertObj(keysOfAdmin, input.body);
@@ -111,7 +111,7 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     };
   }
 
-  @HttpMethods(true)
+  @HttpMethods()
   async getAdminById(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new AdminService();
     const { idAdmin, idGet } = input.params;
@@ -132,7 +132,7 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     };
   }
 
-  @HttpMethods(true)
+  @HttpMethods()
   async postAdmin(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new AdminService();
     const { idAdmin } = input.params;
@@ -169,7 +169,7 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
   //   };
   // }
 
-  @HttpMethods(true)
+  @HttpMethods()
   async putAdminById(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new AdminService();
     const { idAdmin, idPut } = input.params;
@@ -193,7 +193,7 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     };
   }
 
-  @HttpMethods(true)
+  @HttpMethods()
   async deleteAdminById(
     input: InputHttpMethodsArgument
   ): Promise<ReturnMethod> {

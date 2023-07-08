@@ -53,6 +53,6 @@ export const IUserSchemaWAvatar = {
   ...IUserSchema,
   avatar: {
     type: String,
-    required: false,
+    default: "",
   },
 };

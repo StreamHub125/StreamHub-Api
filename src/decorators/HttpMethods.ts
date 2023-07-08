@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-export default function HttpMethods(sendPromise: boolean): Function {
+export default function HttpMethods(sendPromise = true): Function {
   return function (
     _target: Object,
     _key: string | symbol,

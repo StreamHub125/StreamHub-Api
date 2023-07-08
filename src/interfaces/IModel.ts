@@ -1,10 +1,5 @@
 import { Document } from "mongoose";
-import {
-  IUserSchemaWAvatar,
-  IUserWAvatar,
-  keysOfIUser,
-  keysOfIUserWAvatar,
-} from "./IUser";
+import { IUserSchemaWAvatar, IUserWAvatar, keysOfIUserWAvatar } from "./IUser";
 
 export interface IModel extends IUserWAvatar {
   photos: {

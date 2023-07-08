@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-export function HttpMethodsFile(sendPromise: boolean): Function {
+export function HttpMethodsFile(sendPromise = true): Function {
   return function (
     _target: Object,
     _key: string | symbol,
@@ -57,7 +57,7 @@ export function HttpMethodsFile(sendPromise: boolean): Function {
   };
 }
 
-export function HttpMethodsFiles(sendPromise: boolean): Function {
+export function HttpMethodsFiles(sendPromise = true): Function {
   return function (
     _target: Object,
     _key: string | symbol,

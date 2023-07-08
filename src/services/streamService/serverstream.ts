@@ -8,6 +8,7 @@ const nms = new NodeMediaServer(config as Config);
 const loggerNMs = new Logger(EnumColorLogger.FgGreen, "NMS");
 
 nms.on("prePublish", (_id, _StreamPath, _args) => {
+  console.log(_id, _StreamPath, _args);
   loggerNMs.Log("Node Media Server");
 });
 

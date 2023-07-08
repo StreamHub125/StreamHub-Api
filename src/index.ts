@@ -5,12 +5,16 @@ import { followController } from "./controllers/Follow/Follow";
 import FollowRouter from "./controllers/Follow/FollowRouter";
 import { genderController } from "./controllers/Gender/Gender";
 import genderRouter from "./controllers/Gender/GenderRouter";
+import { historyController } from "./controllers/History/History";
+import HistoryRouter from "./controllers/History/HistoryRouter";
 import { modelController } from "./controllers/Models/Model";
 import ModelRouter from "./controllers/Models/ModelRouter";
 import { moderatorController } from "./controllers/Moderator/Moderator";
 import ModeratorRouter from "./controllers/Moderator/ModeratorRouter";
 import { moderatorsModelsController } from "./controllers/Moderators-Models/Moderators-Models";
 import ModeratorsModelRouter from "./controllers/Moderators-Models/Moderators-ModelsRouter";
+import { streamsController } from "./controllers/Streams/Streams";
+import StreamsRouter from "./controllers/Streams/StreamsRouter";
 import { tagController } from "./controllers/Tag/Tag";
 import TagRouter from "./controllers/Tag/TagRouter";
 import { viewerController } from "./controllers/Viewer/Viewer";
@@ -38,14 +42,16 @@ app.import(genderController, genderRouter);
 app.import(tagController, TagRouter);
 // Viewer Controller Import
 app.import(viewerController, ViewerRouter);
-// Moderator Controller import
-app.import(modelController, ModelRouter);
 // Moderator Controller Import
 app.import(moderatorController, ModeratorRouter);
 // Follow Controller Import
 app.import(followController, FollowRouter);
 // Moderators Models Controller Import
 app.import(moderatorsModelsController, ModeratorsModelRouter);
+// History Controller Import
+app.import(historyController, HistoryRouter);
+// Streams Controller Import
+app.import(streamsController, StreamsRouter);
 
 app.init();
 
