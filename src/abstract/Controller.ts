@@ -48,6 +48,6 @@ export abstract class Controller<IType, TypeService extends IService<IType>> {
   addInterceptor(): void {
     this.logRoutes();
     const PATH = this.path.split("/")[1];
-    pushInterceptor(PATH, this.Interceptor);
+    pushInterceptor(PATH, this.Interceptor, this.path);
   }
 }

@@ -9,7 +9,7 @@ import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { IFollow } from "../../interfaces/IFollow";
 import FollowService from "../../services/FollowService";
-import { VerifyID, getUrlPath } from "../../utils/const";
+import { VerifyID, hasNextPaginate } from "../../utils/const";
 import ViewerService from "../../services/ViewerService";
 import ModelService from "../../services/ModelService";
 
@@ -68,6 +68,7 @@ export default class FollowController extends Controller<
   async getFollowModel({
     params,
     query,
+    body,
   }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new FollowService();
     const { idModel } = params;
@@ -75,6 +76,7 @@ export default class FollowController extends Controller<
     const page = parseInt(query.page) || 1;
     const modelVerify = await VerifyID(idModel, new ModelService(), "Model");
     if (modelVerify !== null) return modelVerify;
+    const { pathComplete } = body;
     const follows = await service.Find(
       { idModel },
       {
@@ -83,21 +85,17 @@ export default class FollowController extends Controller<
       }
     );
 
-    if (follows.hasPrevPage) {
-      follows.prevPage = `${getUrlPath()}${
-        this.path
-      }/model/${idModel}?limit=${limit}&page=${page - 1}`;
-    }
-
-    if (follows.hasNextPage) {
-      follows.nextPage = `${getUrlPath()}${
-        this.path
-      }/model/${idModel}?limit=${limit}&page=${page + 1}`;
-    }
+    const followsWhitPageinate = hasNextPaginate(
+      follows,
+      pathComplete,
+      `/model/${idModel}`,
+      limit,
+      page
+    );
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: follows,
+      response: followsWhitPageinate,
     };
   }
 
@@ -105,6 +103,7 @@ export default class FollowController extends Controller<
   async getFollowViewer({
     params,
     query,
+    body,
   }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new FollowService();
     const { idViewer } = params;
@@ -124,21 +123,19 @@ export default class FollowController extends Controller<
       }
     );
 
-    if (follows.hasPrevPage) {
-      follows.prevPage = `${getUrlPath()}${
-        this.path
-      }/viewer/${idViewer}?limit=${limit}&page=${page - 1}`;
-    }
+    const { pathComplete } = body;
 
-    if (follows.hasNextPage) {
-      follows.nextPage = `${getUrlPath()}${
-        this.path
-      }/viewer/${idViewer}?limit=${limit}&page=${page + 1}`;
-    }
+    const followsWhitPageinate = hasNextPaginate(
+      follows,
+      pathComplete,
+      `/viewer/${idViewer}`,
+      limit,
+      page
+    );
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: follows,
+      response: followsWhitPageinate,
     };
   }
 

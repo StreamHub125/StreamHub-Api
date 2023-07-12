@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IModerator } from "../interfaces/IModerator";
 import IService from "../interfaces/IService";
 import ModeratorSchema from "../schemas/Moderator";
@@ -40,7 +41,10 @@ export default class ModeratorService implements IService<IModerator> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IModerator> | null> {
     try {
       const moderator = await ModeratorSchema.paginate(query, set);
       return moderator;

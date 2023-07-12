@@ -1,9 +1,14 @@
+import {
+  HasNextPaginate,
+  PaginatedResult,
+  PaginatedResultPrevNext,
+} from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import AdminService from "../services/AdminService";
 import ModelService from "../services/ModelService";
 import ModeratorService from "../services/ModeratorService";
 import ViewerService from "../services/ViewerService";
-import { ENVIRONMENTSTYPES, ReturnMethod } from "../types";
+import { ENVIRONMENTSTYPES, ReturnMethod, VerifyIdUser } from "../types";
 import { HTTP_RESPONSE } from "../types.enum";
 import settings from "./json/stettings.json";
 import CloudinaryIm from "cloudinary";
@@ -89,7 +94,7 @@ export async function VerifyID<T, Type extends IService<T>>(
 
 export async function VerifyIDOFUser(
   id: string,
-  service: string
+  service: VerifyIdUser
 ): Promise<ReturnMethod | null> {
   const listService = {
     admin: new AdminService(),
@@ -116,24 +121,34 @@ export async function VerifyIDOFUser(
   }
 }
 
-export function hasNextPaginate(
-  obj: any,
+export function hasNextPaginate<T extends PaginatedResult<any>>(
+  obj: T | null,
   path: string, //  /model/${id}
   url: string,
   limit: number,
   page: number
-): any {
+): HasNextPaginate<T> | null {
+  const prevAndNext: PaginatedResultPrevNext = {
+    nextUrlPage: "",
+    prevUrlPage: "",
+  };
+  if (obj === null) {
+    return null;
+  }
   if (obj.hasPrevPage) {
-    obj.prevPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
+    prevAndNext.nextUrlPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
       page - 1
     }`;
   }
 
   if (obj.hasNextPage) {
-    obj.nextPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
+    prevAndNext.prevUrlPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
       page + 1
     }`;
   }
 
-  return obj;
+  return {
+    ...obj,
+    ...prevAndNext,
+  };
 }

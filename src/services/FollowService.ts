@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IFollow } from "../interfaces/IFollow";
 import IService from "../interfaces/IService";
 import FollowSchema from "../schemas/Follow";
@@ -40,7 +41,10 @@ export default class FollowService implements IService<IFollow> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IFollow> | null> {
     try {
       const follow = await FollowSchema.paginate(query, set);
       return follow;

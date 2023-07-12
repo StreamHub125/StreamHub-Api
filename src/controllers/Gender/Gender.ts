@@ -75,10 +75,14 @@ export default class GenderController extends Controller<
   }
 
   @HttpMethods()
-  async getGenders({ query }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+  async getGenders({
+    body,
+    query,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const service = new GenderService();
     const limit = parseInt(query.limit) || 10;
     const page = parseInt(query.page) || 1;
+    const pathComplete = body.pathComplete;
     const genders = await service.Find(
       {},
       {
@@ -87,7 +91,7 @@ export default class GenderController extends Controller<
       }
     );
 
-    const genderHNHA = hasNextPaginate(genders, this.path, "/", limit, page);
+    const genderHNHA = hasNextPaginate(genders, pathComplete, "/", limit, page);
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

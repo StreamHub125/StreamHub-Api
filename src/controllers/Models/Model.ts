@@ -8,20 +8,19 @@ import { Logger } from "../../utils/Logger";
 import HttpMethods from "../../decorators/HttpMethods";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import ModelService from "../../services/ModelService";
-import { IModel } from "../../interfaces/IModel";
+import { IModel, ModelDefault, keysOfIModel } from "../../interfaces/IModel";
+import { VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
+import { ConvertObj } from "../../utils/ConvertObj";
+import { keysOfIUser } from "../../interfaces/IUser";
+import md5 from "md5";
 
 export default class ModelController extends Controller<IModel, ModelService> {
-  public readonly path: string = "/model";
+  public readonly path = "/model";
 
   //Routes
   /* GETS */
   public readonly pathGetModels: string = "/";
   public readonly pathGetModelById: string = "/:id";
-  public readonly pathGetModelByVerificate: string = "/verificate";
-  public readonly pathGetModelByTag: string = "/tag/:tag";
-  public readonly pathGetModelByLive: string = "/live";
-  public readonly pathGetModelByPopularity: string = "/popularity";
-  public readonly pathGetModelByPopularityTag: string = "/popularity/:tag";
 
   /* POSTS */
   public readonly pathPostModel: string = "/";
@@ -51,36 +50,6 @@ export default class ModelController extends Controller<IModel, ModelService> {
       plur: "By Id", // Example "By ID"
       path: this.pathGetModelById,
       plrs: false,
-    },
-    {
-      type: METHODS_HTTP.GET,
-      plur: "By Verificate Limit and page {url}?limit=5&page=1", // Example "By ID"
-      path: this.pathGetModelByVerificate,
-      plrs: true,
-    },
-    {
-      type: METHODS_HTTP.GET,
-      plur: "By Tag Limit and page {url}?limit=5&page=1", // Example "By ID"
-      path: this.pathGetModelByTag,
-      plrs: true,
-    },
-    {
-      type: METHODS_HTTP.GET,
-      plur: "By Live Limit and page {url}?limit=5&page=1", // Example "By ID"
-      path: this.pathGetModelByLive,
-      plrs: true,
-    },
-    {
-      type: METHODS_HTTP.GET,
-      plur: "By Popularity Limit and page {url}?limit=5&page=1", // Example "By ID"
-      path: this.pathGetModelByPopularity,
-      plrs: true,
-    },
-    {
-      type: METHODS_HTTP.GET,
-      plur: "By Popularity Tag Limit and page {url}?limit=5&page=1", // Example "By ID"
-      path: this.pathGetModelByPopularityTag,
-      plrs: true,
     },
     {
       type: METHODS_HTTP.POST,
@@ -137,75 +106,164 @@ export default class ModelController extends Controller<IModel, ModelService> {
     this.addInterceptor();
   }
 
-  @HttpMethods(false)
-  getModels(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getModels(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const modelService = new ModelService();
+    const limit = Number(input.query.limit) || 10;
+    const page = Number(input.query.page) || 1;
+    const { pathComplete, idAdmin, query } = input.body;
+
+    const queryVerify = ConvertObj(keysOfIModel, query ? query : {});
+    const vAdmin = await VerifyIDOFUser(idAdmin, "admin");
+    const models = await modelService.Find(queryVerify, {
+      limit,
+      page,
+    });
+
+    const modelsWhitPageinate = hasNextPaginate(
+      models,
+      pathComplete,
+      "/",
+      limit,
+      page
+    );
+
+    if (modelsWhitPageinate === null) {
+      return {
+        response: "Not Models",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+
+    if (vAdmin === null) {
+      return {
+        status: HTTP_RESPONSE.ACCEPTED,
+        response: modelsWhitPageinate,
+      };
+    }
+
+    modelsWhitPageinate.docs = modelsWhitPageinate.docs.map((model) => {
+      return {
+        _id: model._id,
+        username: model.username,
+        tag: model.tag,
+        gender: model.gender,
+        avatar: model.avatar ? model.avatar : "",
+      };
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: modelsWhitPageinate,
     };
   }
 
-  @HttpMethods(false)
-  getModelById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getModelById(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id } = input.params;
+    const service = new ModelService();
+
+    const model = await service.FindById(id);
+    if (model === null) {
+      return {
+        response: `Not Model whit this id: ${id}`,
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz Id",
+      response: {
+        ...model,
+        secret_key: "",
+      },
     };
   }
 
-  @HttpMethods(false)
-  getModelByVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async postModel(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { body } = input;
+
+    const modelVeri = ConvertObj(
+      [...keysOfIUser, "gender"],
+      body
+    ) as Partial<IModel>;
+
+    if (Object.keys(modelVeri).length === 0) {
+      return {
+        response: "The Content en body not is Aceptable",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+    const service = new ModelService();
+
+    const password = modelVeri.password ? modelVeri.password : "";
+
+    const modelComplete: IModel = {
+      ...ModelDefault,
+      ...modelVeri,
+      secret_key: "",
+      password: md5(password),
+    };
+
+    // return {
+    //   status: HTTP_RESPONSE.ACCEPTED,
+    //   response: modelComplete,
+    // };
+
+    const modelcreate = await service.Create(modelComplete);
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: modelcreate,
     };
   }
 
-  @HttpMethods(false)
-  getModelByTag(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz Tag",
-    };
-  }
+  @HttpMethods()
+  async putModel(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { body, params } = input;
+    const { id } = params;
 
-  @HttpMethods(false)
-  getModelByLive(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
-    };
-  }
+    const modelVeri = ConvertObj(
+      [...keysOfIUser, "gender", "tag"],
+      body
+    ) as Partial<IModel>;
 
-  @HttpMethods(false)
-  getModelByPopularity(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
-    };
-  }
+    if (Object.keys(modelVeri).length === 0) {
+      return {
+        response: "The Content en body.update not is Aceptable",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
 
-  @HttpMethods(false)
-  getModelByPopularityTag(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
-    };
-  }
+    const service = new ModelService();
 
-  @HttpMethods(false)
-  postModel(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
-    };
-  }
+    const modelById = await service.FindById(id);
 
-  @HttpMethods(false)
-  putModel(_input: InputHttpMethodsArgument): ReturnMethod {
+    if (modelById === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Model Whit This Id>>",
+      };
+    }
+
+    const modelUpdates: IModel = {
+      ...modelById,
+      ...modelVeri,
+    };
+
+    const modelUpdate = await service.Update({ _id: id }, modelUpdates);
+
+    if (modelUpdate === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Model Whit This Id",
+      };
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: modelUpdate,
     };
   }
 

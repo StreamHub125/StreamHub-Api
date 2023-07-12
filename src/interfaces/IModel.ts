@@ -1,12 +1,17 @@
 import { Document } from "mongoose";
-import { IUserSchemaWAvatar, IUserWAvatar, keysOfIUserWAvatar } from "./IUser";
+import {
+  IUserSchemaWAvatar,
+  IUserWAvatar,
+  UserWAvatarDefault,
+  keysOfIUserWAvatar,
+} from "./IUser";
 
 export interface IModel extends IUserWAvatar {
   photos: {
-    url: String;
-    price: Number;
-    approve: Boolean;
-    dateApprove: String;
+    url: string;
+    price: number;
+    approve: boolean;
+    dateApprove: string;
   }[];
   isVerificate: boolean;
   verificatePhoto?: string;
@@ -20,6 +25,7 @@ export interface IModelModel extends Document, IModelM {}
 
 export const IModelSchema = {
   ...IUserSchemaWAvatar,
+
   photos: [
     {
       type: {
@@ -62,3 +68,14 @@ export const keysOfIModel = [
   "tag",
   "secret_key",
 ];
+
+export const ModelDefault: IModel = {
+  ...UserWAvatarDefault,
+  username: "",
+  photos: [],
+  isVerificate: false,
+  verificatePhoto: "",
+  gender: "",
+  tag: "",
+  secret_key: "",
+};

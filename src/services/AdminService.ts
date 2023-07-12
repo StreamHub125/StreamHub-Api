@@ -2,7 +2,7 @@ import md5 from "md5";
 import { IAdmin } from "../interfaces/IAdmin";
 import IService from "../interfaces/IService";
 import AdminSchema from "../schemas/Admin";
-import { PaginateResult } from "mongoose";
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 
 export default class AdminService implements IService<IAdmin> {
   constructor() {}
@@ -36,7 +36,7 @@ export default class AdminService implements IService<IAdmin> {
   async Find(
     query: object,
     set: object
-  ): Promise<PaginateResult<Document> | any | null> {
+  ): Promise<PaginatedResult<IAdmin> | null> {
     try {
       const admin = await AdminSchema.paginate(query, set);
       return admin;

@@ -10,7 +10,8 @@ const loggerF: Logger = new Logger(EnumColorLogger.FgBlue, "Interceptor");
 
 function pushInterceptor(
   urlEndpointPrincipal: string,
-  func: InterceptorMethod
+  func: InterceptorMethod,
+  pathcomplete: string
 ): void {
   const newInterceptorExtends: InterceptorExtends = {
     interceptor: (req: Request, res: Response, next: Function): void => {
@@ -21,6 +22,9 @@ function pushInterceptor(
         loggerF.Log(
           `The ${path[0].toUpperCase()} Interceptor has been executed`
         );
+
+        req.body.pathComplete = pathcomplete;
+
         func(req, res, next, loggerF, path[0]);
       }
     },

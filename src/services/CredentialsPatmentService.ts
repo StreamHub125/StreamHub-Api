@@ -1,4 +1,5 @@
 import { ICredentialsPayment } from "../interfaces/ICredentialsPayment";
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import CredentialPaymentSchema from "../schemas/CredentialsPayment";
 
@@ -44,7 +45,10 @@ export default class CredentialsPaymentService
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<ICredentialsPayment> | null> {
     try {
       const cp = await CredentialPaymentSchema.paginate(query, set);
       return cp;

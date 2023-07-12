@@ -1,4 +1,5 @@
 import { ICountMaster } from "../interfaces/ICountMaster";
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import CountMasterSchema from "../schemas/CountMaster";
 
@@ -39,7 +40,10 @@ export default class CountMasterService implements IService<ICountMaster> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<ICountMaster> | null> {
     try {
       const cm = await CountMasterSchema.paginate(query, set);
       return cm;

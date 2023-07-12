@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IGender } from "../interfaces/IGender";
 import IService from "../interfaces/IService";
 import GenderSchema from "../schemas/Gender";
@@ -40,7 +41,10 @@ export default class GenderService implements IService<IGender> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IGender> | null> {
     try {
       const gender = await GenderSchema.paginate(query, set);
       return gender;

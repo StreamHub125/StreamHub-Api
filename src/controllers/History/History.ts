@@ -79,6 +79,7 @@ export default class HistoryController extends Controller<
   async getHistorys({
     params,
     query,
+    body,
   }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const { idAdmin } = params;
     const limit = query.limit || 10;
@@ -86,11 +87,12 @@ export default class HistoryController extends Controller<
     const verifyAdmin = await VerifyID(idAdmin, new AdminService(), "Admin");
     if (verifyAdmin !== null) return verifyAdmin;
 
+    const pathComplete = body.pathComplete;
     const service = new HistoryService();
 
     const history = hasNextPaginate(
       await service.Find({}, { limit, page }),
-      this.path,
+      pathComplete,
       `/${idAdmin}`,
       limit,
       page

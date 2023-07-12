@@ -56,3 +56,17 @@ export const IUserSchemaWAvatar = {
     default: "",
   },
 };
+
+export const UserDefault: IUser = {
+  name: "",
+  lastname: "",
+  username: "",
+  email: "",
+  password: "",
+  cc: "",
+};
+
+export const UserWAvatarDefault: IUserWAvatar = {
+  ...UserDefault,
+  avatar: "",
+};

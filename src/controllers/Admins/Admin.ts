@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { Controller } from "../../abstract/Controller";
-import { IAdmin, keysOfAdmin } from "../../interfaces/IAdmin";
+import { AdminDefault, IAdmin, keysOfAdmin } from "../../interfaces/IAdmin";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import AdminService from "../../services/AdminService";
 import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
@@ -11,7 +11,7 @@ import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { ConvertObj } from "../../utils/ConvertObj";
 import md5 from "md5";
-import { VerifyID, getUrlPath } from "../../utils/const";
+import { VerifyID, hasNextPaginate } from "../../utils/const";
 
 export default class AdminController extends Controller<IAdmin, AdminService> {
   public readonly path: string = "/admin";
@@ -88,26 +88,23 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     const adminVerify = await VerifyID(idAdmin, service, "Admin");
     if (adminVerify !== null) return adminVerify;
     const querr = ConvertObj(keysOfAdmin, input.body);
+    const { pathComplete } = input.body;
     const admins = await service.Find(querr, {
       limit,
       page,
     });
 
-    if (admins.hasPrevPage) {
-      admins.prevPage = `${getUrlPath()}${
-        this.path
-      }/${idAdmin}?limit=${limit}&page=${page - 1}`;
-    }
-
-    if (admins.hasNextPage) {
-      admins.nextPage = `${getUrlPath()}${
-        this.path
-      }/${idAdmin}?limit=${limit}&page=${page + 1}`;
-    }
+    const adminWhitPageinate = hasNextPaginate(
+      admins,
+      pathComplete,
+      `/${idAdmin}`,
+      limit,
+      page
+    );
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: admins,
+      response: adminWhitPageinate,
     };
   }
 
@@ -138,13 +135,34 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     const { idAdmin } = input.params;
     const adminVerify = await VerifyID(idAdmin, service, "Admin");
     if (adminVerify) return adminVerify;
-    if (!input.body.email.includes("streamhub")) {
+
+    const { body } = input;
+    if (body.email) {
+      if (!input.body.email.includes("streamhub")) {
+        return {
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          response: "Email Not Validate",
+        };
+      }
+    }
+
+    const admin = ConvertObj(keysOfAdmin, body) as Partial<IAdmin>;
+    if (Object.keys(admin).length === 0) {
       return {
         status: HTTP_RESPONSE.NO_ACCEPTABLE,
-        response: "Email Not Validate",
+        response: "The Object Is Empty",
       };
     }
-    const adminCreate = await service.Create(input.body);
+
+    const password = admin.password ? admin.password : "";
+
+    const adminComplete: IAdmin = {
+      ...AdminDefault,
+      ...admin,
+      password: md5(password),
+    };
+
+    const adminCreate = await service.Create(adminComplete);
     return {
       status: HTTP_RESPONSE.ACCEPTED,
       response: adminCreate,

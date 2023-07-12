@@ -158,3 +158,5 @@ export interface FissionTaskModel {
   vf: string;
 }
 /* Finish Types Node Media Server */
+
+export type VerifyIdUser = "admin" | "model" | "moderator" | "viewer";

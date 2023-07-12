@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IModeratorsModels } from "../interfaces/IModerators-Models";
 import IService from "../interfaces/IService";
 import ModeratorsModelSchema from "../schemas/Moderators-Models";
@@ -44,7 +45,10 @@ export default class ModeratorsModelsService
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IModeratorsModels> | null> {
     try {
       const mms = await ModeratorsModelSchema.paginate(query, set);
       return mms;

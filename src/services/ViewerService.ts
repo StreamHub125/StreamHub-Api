@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import { IViewer } from "../interfaces/IViewer";
 import ViewerSchema from "../schemas/Viewer";
@@ -38,7 +39,10 @@ export default class ViewerService implements IService<IViewer> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IViewer> | null> {
     try {
       const viewer = await ViewerSchema.paginate(query, set);
       return viewer;

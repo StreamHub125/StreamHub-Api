@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IHistory } from "../interfaces/IHistory";
 import IService from "../interfaces/IService";
 import HistorySchema from "../schemas/History";
@@ -39,7 +40,10 @@ export default class HistoryService implements IService<IHistory> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IHistory> | null> {
     try {
       const history = await HistorySchema.paginate(query, set);
       return history;

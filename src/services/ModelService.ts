@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IModel } from "../interfaces/IModel";
 import IService from "../interfaces/IService";
 import ModelSchema from "../schemas/Model";
@@ -30,7 +31,10 @@ export default class ModelService implements IService<IModel> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IModel> | null> {
     try {
       const model = await ModelSchema.paginate(query, set);
       return model;

@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import { ITag } from "../interfaces/ITag";
 import TagSchema from "../schemas/Tag";
@@ -37,7 +38,10 @@ export default class TagService implements IService<ITag> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<ITag> | null> {
     try {
       const tag = await TagSchema.paginate(query, set);
       return tag;

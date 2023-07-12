@@ -1,3 +1,4 @@
+import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import { IStreams } from "../interfaces/IStreams";
 import StremasSchema from "../schemas/Streams";
@@ -39,7 +40,10 @@ export default class StreamsService implements IService<IStreams> {
       return null;
     }
   }
-  async Find(query: object, set: object): Promise<any | null> {
+  async Find(
+    query: object,
+    set: object
+  ): Promise<PaginatedResult<IStreams> | null> {
     try {
       const stream = await StremasSchema.paginate(query, set);
       return stream;
