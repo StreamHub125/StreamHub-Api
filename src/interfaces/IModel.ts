@@ -1,5 +1,6 @@
 import { Document } from "mongoose";
 import {
+  AvatarType,
   IUserSchemaWAvatar,
   IUserWAvatar,
   UserWAvatarDefault,
@@ -7,16 +8,10 @@ import {
 } from "./IUser";
 
 export interface IModel extends IUserWAvatar {
-  photos: {
-    url: string;
-    price: number;
-    approve: boolean;
-    dateApprove: string;
-  }[];
   isVerificate: boolean;
-  verificatePhoto?: string;
+  verificatePhoto?: AvatarType;
   gender: string;
-  tag: string;
+  tag: string[];
   secret_key: string;
 }
 
@@ -25,32 +20,46 @@ export interface IModelModel extends Document, IModelM {}
 
 export const IModelSchema = {
   ...IUserSchemaWAvatar,
-
-  photos: [
-    {
-      type: {
-        url: String,
-        price: Number,
-        approve: Boolean,
-        dateApprove: String,
-      },
-      default: [],
-    },
-  ],
   isVerificate: {
     type: Boolean,
     default: false,
   },
   verificatePhoto: {
-    type: String,
-    required: false,
+    type: {
+      public_id: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      secure_url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      cl_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      resource_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+    },
+    default: {},
   },
   gender: {
     type: String,
     required: true,
   },
   tag: {
-    type: String,
+    type: [String],
     required: true,
   },
   secret_key: {
@@ -61,7 +70,6 @@ export const IModelSchema = {
 
 export const keysOfIModel = [
   ...keysOfIUserWAvatar,
-  "photos",
   "isVerificate",
   "verificatePhoto",
   "gender",
@@ -72,10 +80,15 @@ export const keysOfIModel = [
 export const ModelDefault: IModel = {
   ...UserWAvatarDefault,
   username: "",
-  photos: [],
   isVerificate: false,
-  verificatePhoto: "",
+  verificatePhoto: {
+    public_id: "",
+    secure_url: "",
+    url: "",
+    cl_type: "",
+    resource_type: "",
+  },
   gender: "",
-  tag: "",
+  tag: [],
   secret_key: "",
 };

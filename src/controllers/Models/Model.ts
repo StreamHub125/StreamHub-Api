@@ -6,13 +6,29 @@ import { ILoggerChild } from "../../interfaces/ILoggerChild";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import { Logger } from "../../utils/Logger";
 import HttpMethods from "../../decorators/HttpMethods";
-import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
+import {
+  InputHttpMethodsArgument,
+  InputHttpMethodsArgumentFile,
+  InputHttpMethodsArgumentFiles,
+  ROUTESLOG,
+  ReturnMethod,
+  WID,
+} from "../../types";
 import ModelService from "../../services/ModelService";
 import { IModel, ModelDefault, keysOfIModel } from "../../interfaces/IModel";
 import { VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
 import { ConvertObj } from "../../utils/ConvertObj";
-import { keysOfIUser } from "../../interfaces/IUser";
+import { UserWAvatarDefault, keysOfIUser } from "../../interfaces/IUser";
 import md5 from "md5";
+import {
+  HttpMethodsFile,
+  HttpMethodsFiles,
+} from "../../decorators/HttpMethodsFiles";
+import { randomUUID } from "crypto";
+import ImagesService from "../../services/ImagesService";
+import AdminService from "../../services/AdminService";
+import SaveImageService from "../../services/SaveImageService/SaveImageService";
+import ModeratorService from "../../services/ModeratorService";
 
 export default class ModelController extends Controller<IModel, ModelService> {
   public readonly path = "/model";
@@ -35,6 +51,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
 
   /* DELETES */
   public readonly pathDeleteModel: string = "/:id";
+  public readonly pathDeleteImage: string = "/image/:id/:type";
   //Finish Routes
 
   service: ModelService;
@@ -106,6 +123,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
     this.addInterceptor();
   }
 
+  // Se puede enviar con el body sin nada
   @HttpMethods()
   async getModels(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const modelService = new ModelService();
@@ -148,7 +166,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
         username: model.username,
         tag: model.tag,
         gender: model.gender,
-        avatar: model.avatar ? model.avatar : "",
+        avatar: model.avatar ? model.avatar : UserWAvatarDefault.avatar,
       };
     });
 
@@ -161,7 +179,26 @@ export default class ModelController extends Controller<IModel, ModelService> {
   @HttpMethods()
   async getModelById(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const { id } = input.params;
+    const { client, idUser } = input.body;
     const service = new ModelService();
+    if (
+      client !== "model" &&
+      client !== "moderator" &&
+      client !== "view" &&
+      client !== "admin"
+    ) {
+      return {
+        response: "Client not is acceptable",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    }
+
+    if (idUser === undefined || idUser === null) {
+      return {
+        response: "idUser Required",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    }
 
     const model = await service.FindById(id);
     if (model === null) {
@@ -170,13 +207,78 @@ export default class ModelController extends Controller<IModel, ModelService> {
         status: HTTP_RESPONSE.NO_CONTENT,
       };
     }
+    let modelM: Partial<WID<IModel>> = {
+      _id: model._id,
+      email: model.email,
+      username: model.username,
+      gender: model.gender,
+      tag: model.tag,
+      avatar: model.avatar,
+    };
+
+    if (client === "admin") {
+      const adminService = new AdminService();
+      const user = await adminService.FindById(idUser);
+      if (user === null) {
+        return {
+          response: "Not Admin Whit this Id",
+          status: HTTP_RESPONSE.ACCEPTED,
+        };
+      }
+      modelM = model;
+    } else if (client === "view") {
+      if (model.isVerificate === false) {
+        return {
+          status: HTTP_RESPONSE.ACCEPTED,
+          response: "Not model whit This Id",
+        };
+      } else {
+        modelM = {
+          _id: model._id,
+          username: model.username,
+          gender: model.gender,
+          tag: model.tag,
+          avatar: model.avatar,
+        };
+      }
+    } else if (client === "moderator") {
+      const moderatorService = new ModeratorService();
+      const mod = await moderatorService.FindById(idUser);
+      if (mod === null) {
+        return {
+          response: "Not Moderator Whit this Id",
+          status: HTTP_RESPONSE.ACCEPTED,
+        };
+      }
+      modelM = {
+        _id: model._id,
+        username: model.username,
+        gender: model.gender,
+        tag: model.tag,
+        avatar: model.avatar,
+      };
+    } else if (client === "model") {
+      if (id !== idUser) {
+        return {
+          response: "Your not this Model",
+          status: HTTP_RESPONSE.ACCEPTED,
+        };
+      }
+      modelM = {
+        name: model.name,
+        lastname: model.lastname,
+        username: model.username,
+        email: model.email,
+        cc: model.cc,
+        isVerificate: model.isVerificate,
+        gender: model.gender,
+        tag: model.tag,
+      };
+    }
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: {
-        ...model,
-        secret_key: "",
-      },
+      response: modelM,
     };
   }
 
@@ -202,7 +304,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
     const modelComplete: IModel = {
       ...ModelDefault,
       ...modelVeri,
-      secret_key: "",
+      secret_key: randomUUID(),
       password: md5(password),
     };
 
@@ -211,11 +313,20 @@ export default class ModelController extends Controller<IModel, ModelService> {
     //   response: modelComplete,
     // };
 
-    const modelcreate = await service.Create(modelComplete);
-
+    const modelcreate = (await service.Create(modelComplete)) as WID<IModel>;
+    const modelFilter: Partial<WID<IModel>> = {
+      _id: modelcreate._id,
+      name: modelcreate.name,
+      lastname: modelcreate.lastname,
+      username: modelcreate.username,
+      email: modelcreate.email,
+      cc: modelcreate.cc,
+      gender: modelcreate.gender,
+      tag: modelcreate.tag,
+    };
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: modelcreate,
+      response: modelFilter,
     };
   }
 
@@ -267,43 +378,286 @@ export default class ModelController extends Controller<IModel, ModelService> {
     };
   }
 
-  @HttpMethods(false)
-  putModelImageSale(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethodsFiles()
+  async putModelImageSale({
+    files,
+    params,
+  }: InputHttpMethodsArgumentFiles): Promise<ReturnMethod> {
+    const { id } = params;
+    const modelService: ModelService = new ModelService();
+    const model = await modelService.FindById(id);
+    if (model === null)
+      return {
+        response: "Not Model Whit this Id",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    files.forEach((file) => {
+      modelService.SavePhotoSale(file, model._id, (file) => {
+        console.log(file);
+      });
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Save Photos",
     };
   }
 
-  @HttpMethods(false)
-  putModelImageAvatar(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethodsFile()
+  async putModelImageAvatar({
+    params,
+    file,
+  }: InputHttpMethodsArgumentFile): Promise<ReturnMethod> {
+    const { id } = params;
+    const modelService: ModelService = new ModelService();
+    const model = await modelService.FindById(id);
+    if (model === null)
+      return {
+        response: "Not Model Whit this Id",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    modelService.SavePhotoAvatar(file, model._id, (file) => {
+      console.log(file);
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Save Photos",
     };
   }
 
-  @HttpMethods(false)
-  putModelImageVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethodsFile()
+  async putModelImageVerificate({
+    params,
+    file,
+  }: InputHttpMethodsArgumentFile): Promise<ReturnMethod> {
+    const { id } = params;
+    const modelService: ModelService = new ModelService();
+    const model = await modelService.FindById(id);
+    if (model === null)
+      return {
+        response: "Not Model Whit this Id",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    modelService.SavePhotoVerificated(file, model._id, (file) => {
+      console.log(file);
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Save Photo",
     };
   }
 
-  @HttpMethods(false)
-  putModelIsVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async putModelIsVerificate({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    //"/is-verificate/:idAdmin/:id/:isV";
+    const { idAdmin, id, isV } = params;
+    const iss = isV as string;
+
+    if (iss !== "true" && iss !== "false") {
+      return {
+        response: `Not Valid Boolean true o false`,
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    }
+
+    const adminservice = new AdminService();
+    const admin = await adminservice.FindById(idAdmin);
+    if (admin === null) {
+      return {
+        response: `Not Admin whit this Id ${idAdmin}`,
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+    const modelservice = new ModelService();
+    const model = await modelservice.FindById(id);
+    if (model === null) {
+      return {
+        response: `Not Model whit this Id ${id}`,
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+
+    modelservice.Update(
+      { _id: id },
+      {
+        isVerificate: Boolean(isV),
+      }
+    );
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: "Model Verificate",
     };
   }
 
-  @HttpMethods(false)
-  deleteModel(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async deleteModel({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id } = params;
+    const modelService = new ModelService();
+
+    const model = await modelService.FindById(id);
+    if (model === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Model Whit this Id",
+      };
+    }
+
+    if (model.avatar) {
+      if (model.avatar.public_id !== "") {
+        return {
+          response: "Delete Images First Avatar",
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        };
+      }
+    }
+
+    if (model.verificatePhoto) {
+      if (model.verificatePhoto.public_id !== "") {
+        return {
+          response: "Delete Images First VerificatePhoto",
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        };
+      }
+    }
+
+    const imageservice = new ImagesService();
+    const images = await imageservice.Find(
+      {
+        idModel: id,
+      },
+      {
+        limit: 10,
+        page: 1,
+      }
+    );
+
+    if (images !== null) {
+      if (images.totalDocs > 0) {
+        return {
+          response: "Delete Images First Saleimages",
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        };
+      }
+    }
+
+    const deleting = await modelService.Delete(id);
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "Recibido Daniel Campaz",
+      response: deleting,
+    };
+  }
+
+  @HttpMethods()
+  async deleteImages({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id, type } = params;
+
+    if (type !== "avatar" && type !== "verifyimage") {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: "Not Acceptable the Type",
+      };
+    }
+
+    let update: object = {
+      avatar: {
+        public_id: "",
+        secure_url: "",
+        url: "",
+        cl_type: "",
+        resource_type: "",
+      },
+    };
+
+    const modelService = new ModelService();
+    const model = await modelService.FindById(id);
+    if (model === null)
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: `Not Model Whit Id ${id}`,
+      };
+    if (type === "avatar") {
+      if (model.avatar === undefined) {
+        return {
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          response: `Not Avatar en Model`,
+        };
+      }
+      if (model.avatar.public_id === "") {
+        return {
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          response: `Not Avatar en Model`,
+        };
+      }
+      const saveImageService = new SaveImageService();
+      saveImageService.deleteImage({
+        ids: [
+          {
+            ids: [model.avatar.public_id],
+            resource_type: model.avatar.resource_type,
+            type: model.avatar.cl_type,
+          },
+        ],
+      });
+      update = {
+        avatar: {
+          public_id: "",
+          secure_url: "",
+          url: "",
+          cl_type: "",
+          resource_type: "",
+        },
+      };
+    }
+
+    if (type === "verifyimage") {
+      if (model.verificatePhoto === undefined) {
+        return {
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          response: `Not VerifyImage en Model`,
+        };
+      }
+      if (model.verificatePhoto.public_id === "") {
+        return {
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          response: `Not VerifyImage en Model`,
+        };
+      }
+      const saveImageService = new SaveImageService();
+      saveImageService.deleteImage({
+        ids: [
+          {
+            ids: [model.verificatePhoto.public_id],
+            resource_type: model.verificatePhoto.resource_type,
+            type: model.verificatePhoto.cl_type,
+          },
+        ],
+      });
+      update = {
+        verificatePhoto: {
+          public_id: "",
+          secure_url: "",
+          url: "",
+          cl_type: "",
+          resource_type: "",
+        },
+      };
+    }
+
+    await modelService.Update({ _id: id }, update);
+
+    return {
+      status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      response: `Images of type ${type} Delete`,
     };
   }
 

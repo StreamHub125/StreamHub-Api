@@ -2,9 +2,14 @@ import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import { IModerator } from "../interfaces/IModerator";
 import IService from "../interfaces/IService";
 import ModeratorSchema from "../schemas/Moderator";
+import { CloudinaryResponse, MulterImage, WID } from "../types";
+import SaveImageService from "./SaveImageService/SaveImageService";
 
 export default class ModeratorService implements IService<IModerator> {
-  constructor() {}
+  saveImageService: SaveImageService;
+  constructor() {
+    this.saveImageService = new SaveImageService();
+  }
   async Create(item: IModerator): Promise<IModerator> {
     const moderator: IModerator = {
       ...item,
@@ -33,7 +38,7 @@ export default class ModeratorService implements IService<IModerator> {
       return null;
     }
   }
-  async FindById(id: string): Promise<IModerator | null> {
+  async FindById(id: string): Promise<WID<IModerator> | null> {
     try {
       const moderator = await ModeratorSchema.findById(id);
       return moderator;
@@ -51,5 +56,50 @@ export default class ModeratorService implements IService<IModerator> {
     } catch (error) {
       return null;
     }
+  }
+
+  SavePhotoVerificated(
+    file: MulterImage,
+    id: string,
+    fn: (file: CloudinaryResponse | null) => void,
+    error: (error: any) => void = (error) => {
+      console.log(error);
+    }
+  ): void {
+    const saveInModel = async (file: CloudinaryResponse | null) => {
+      if (file === null) return;
+      const md = new ModeratorService();
+      const model = await md.FindById(id);
+      if (model !== null) {
+        if (model.verificatePhoto) {
+          if (model.verificatePhoto.secure_url !== "") {
+            new SaveImageService().deleteImage({
+              ids: [
+                {
+                  ids: [model.verificatePhoto.public_id],
+                  resource_type: model.verificatePhoto.resource_type,
+                  type: model.verificatePhoto.cl_type,
+                },
+              ],
+            });
+          }
+        }
+        // Eliminar la imagen
+      }
+      await md.Update(
+        { _id: id },
+        {
+          verificatePhoto: {
+            public_id: file.public_id,
+            secure_url: file.secure_url,
+            url: file.url,
+            cl_type: file.type,
+            resource_type: file.resource_type,
+          },
+        }
+      );
+      fn(file);
+    };
+    this.saveImageService.saveImage(file, id).then(saveInModel).catch(error);
   }
 }

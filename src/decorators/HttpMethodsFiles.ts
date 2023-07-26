@@ -12,7 +12,6 @@ export function HttpMethodsFile(sendPromise = true): Function {
         original({
           body: req.body,
           params: req.params,
-
           query: req.query,
           file: req.file,
         }).then((value: any) => {
@@ -70,7 +69,6 @@ export function HttpMethodsFiles(sendPromise = true): Function {
           body: req.body,
           params: req.params,
           files: req.files,
-
           query: req.query,
         }).then((value: any) => {
           if (typeof value === "object") {

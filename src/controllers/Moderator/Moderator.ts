@@ -3,12 +3,27 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { Controller } from "../../abstract/Controller";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
-import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
+import {
+  InputHttpMethodsArgument,
+  InputHttpMethodsArgumentFile,
+  ROUTESLOG,
+  ReturnMethod,
+  WID,
+} from "../../types";
 import { Logger } from "../../utils/Logger";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
-import { IModerator } from "../../interfaces/IModerator";
+import {
+  IModerator,
+  ModeratorDefault,
+  keysOfIModerator,
+} from "../../interfaces/IModerator";
 import ModeratorService from "../../services/ModeratorService";
+import { VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
+import { ConvertObj } from "../../utils/ConvertObj";
+import md5 from "md5";
+import { HttpMethodsFile } from "../../decorators/HttpMethodsFiles";
+import SaveImageService from "../../services/SaveImageService/SaveImageService";
 
 export default class ModeratorController extends Controller<
   IModerator,
@@ -18,20 +33,19 @@ export default class ModeratorController extends Controller<
 
   /* GET */
   public readonly pathGetModerators = "/:idAdmin";
-  public readonly pathGetModeratorById = "/:id";
-  public readonly pathGetModeratorByVerificate: string = "/verificate/:idAdmin";
+  public readonly pathGetModeratorById = "/byid/:id";
 
   /* POST */
   public readonly pathPostModerator = "/:idAdmin";
 
   /* PUT */
   public readonly pathPutModerator = "/:id";
-  public readonly pathPutModeratorVerify = "/:idAdmin/:id";
-  public readonly pathPutModeratorAddModel = "/add-model/:idAdmin/:id";
+  public readonly pathPutModeratorVerify = "/is-verificate/:idAdmin/:id/:isV";
   public readonly pathPutModeratorImageVerificate = "/image-verificate/:id";
 
   /* DELETE */
   public readonly pathDeleteModerator = "/:id";
+  public readonly pathDeleteImage: string = "/image/:id";
 
   routesLog: ROUTESLOG[] = [
     {
@@ -46,12 +60,7 @@ export default class ModeratorController extends Controller<
       plrs: false,
       plur: "Get Moderators by Id",
     },
-    {
-      type: METHODS_HTTP.GET,
-      path: this.pathGetModeratorByVerificate,
-      plrs: false,
-      plur: "Get Moderators by Verifycate",
-    },
+
     {
       type: METHODS_HTTP.POST,
       path: this.pathPostModerator,
@@ -69,12 +78,6 @@ export default class ModeratorController extends Controller<
       path: this.pathPutModeratorVerify,
       plrs: false,
       plur: "PUT Moderators need Admin Id and Id Moderator for Verificated",
-    },
-    {
-      type: METHODS_HTTP.PUT,
-      path: this.pathPutModeratorAddModel,
-      plrs: false,
-      plur: "PUT Moderators need Admin Id and Id Moderator for Add Model to moderate",
     },
     {
       type: METHODS_HTTP.PUT,
@@ -99,75 +102,380 @@ export default class ModeratorController extends Controller<
     this.addInterceptor();
   }
 
-  @HttpMethods(false)
-  getModerators(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getModerators(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const moderatorService = new ModeratorService();
+    const limit = Number(input.query.limit) || 10;
+    const page = Number(input.query.page) || 1;
+    const { idAdmin } = input.params;
+    const { query, pathComplete } = input.body;
+
+    const queryVerify = ConvertObj(keysOfIModerator, query ? query : {});
+    const vAdmin = await VerifyIDOFUser(idAdmin, "admin");
+    if (vAdmin !== null) {
+      return {
+        status: HTTP_RESPONSE.ACCEPTED,
+        response: "Not Admin Whit This Id",
+      };
+    }
+    const moderator = await moderatorService.Find(queryVerify, {
+      limit,
+      page,
+    });
+
+    const moderatorWhitPageinate = hasNextPaginate(
+      moderator,
+      pathComplete,
+      "/",
+      limit,
+      page
+    );
+
+    if (moderatorWhitPageinate === null) {
+      return {
+        response: "Not Models",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: moderatorWhitPageinate,
     };
   }
 
-  @HttpMethods(false)
-  getModeratorById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getModeratorById({
+    params,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id } = params;
+    const { type, idUser } = body;
+    const moderatorService = new ModeratorService();
+    if (type !== "admin" && type !== "model" && type !== "moderator") {
+      return {
+        response: "T Not Accepte",
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+    const verUser = await VerifyIDOFUser(idUser, type);
+    if (verUser !== null) {
+      return {
+        response: `Not ${type} whit this Id ${idUser}`,
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+
+    const mosd = await moderatorService.FindById(id);
+    if (mosd === null)
+      return {
+        response: "Not Moderator whit this Id",
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    let mmm: Partial<WID<IModerator>> = {};
+
+    if (type === "admin") {
+      mmm = mosd;
+    } else if (type === "model") {
+      mmm = {
+        _id: mosd._id,
+        username: mosd.username,
+        name: mosd.name,
+      };
+    } else if (type === "moderator") {
+      if (id === idUser) {
+        mmm = {
+          _id: mosd._id,
+          cc: mosd.cc,
+          email: mosd.email,
+          lastname: mosd.lastname,
+          name: mosd.name,
+          password: mosd.password,
+          username: mosd.username,
+          verificatePhoto: mosd.verificatePhoto,
+          isVerificate: mosd.isVerificate,
+        };
+      } else {
+        return {
+          status: HTTP_RESPONSE.ACCEPTED,
+          response: "your not moderator",
+        };
+      }
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: mmm,
     };
   }
 
-  @HttpMethods(false)
-  getModeratorByVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async postModerator({
+    body,
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin } = params;
+    const modelVeri = ConvertObj(
+      [...keysOfIModerator],
+      body
+    ) as Partial<IModerator>;
+
+    const us = await VerifyIDOFUser(idAdmin, "admin");
+
+    if (us !== null) {
+      return {
+        response: "not Admin whit this id",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+
+    if (Object.keys(modelVeri).length === 0) {
+      return {
+        response: "The Content en body not is Aceptable",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+    const service = new ModeratorService();
+
+    const password = modelVeri.password ? modelVeri.password : "";
+
+    const modelComplete: IModerator = {
+      ...ModeratorDefault,
+      ...modelVeri,
+      password: md5(password),
+      admin: idAdmin,
+    };
+
+    const moderatorcreate = (await service.Create(
+      modelComplete
+    )) as WID<IModerator>;
+    const moderatorFilter: Partial<WID<IModerator>> = {
+      _id: moderatorcreate._id,
+      name: moderatorcreate.name,
+      lastname: moderatorcreate.lastname,
+      username: moderatorcreate.username,
+      email: moderatorcreate.email,
+      cc: moderatorcreate.cc,
+      isVerificate: moderatorcreate.isVerificate,
+    };
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: moderatorFilter,
     };
   }
 
-  @HttpMethods(false)
-  postModerator(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async putModerator(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { body, params } = input;
+    const { id } = params;
+    const fA = ["email", "username", "name"];
+    const kesy = keysOfIModerator.filter((e) => !fA.includes(e));
+
+    const modelVeri = ConvertObj([...kesy], body) as Partial<IModerator>;
+
+    if (Object.keys(modelVeri).length === 0) {
+      return {
+        response: "The Content en body.update not is Aceptable",
+        status: HTTP_RESPONSE.NO_CONTENT,
+      };
+    }
+
+    const service = new ModeratorService();
+
+    const modelById = await service.FindById(id);
+
+    if (modelById === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Moderator Whit This Id>>",
+      };
+    }
+    const modelUpdate = (await service.Update(
+      { _id: id },
+      modelVeri
+    )) as WID<IModerator>;
+
+    if (modelUpdate === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Model Whit This Id",
+      };
+    }
+
+    const moderatorr: Partial<WID<IModerator>> = {
+      _id: modelUpdate._id,
+      cc: modelUpdate.cc,
+      email: modelUpdate.email,
+      lastname: modelUpdate.lastname,
+      name: modelUpdate.name,
+      password: modelUpdate.password,
+      username: modelUpdate.username,
+      verificatePhoto: modelUpdate.verificatePhoto,
+      isVerificate: modelUpdate.isVerificate,
+    };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: moderatorr,
     };
   }
 
-  @HttpMethods(false)
-  putModerator(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async putModeratorVerify({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    //"/is-verificate/:idAdmin/:id/:isV";
+    const { idAdmin, id, isV } = params;
+    const iss = isV as string;
+
+    const admin = await VerifyIDOFUser(idAdmin, "admin");
+    if (admin !== null) {
+      return {
+        response: `Not Admin whit this Id ${idAdmin}`,
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+    if (iss !== "true" && iss !== "false") {
+      return {
+        response: `Not Valid Boolean true o false`,
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    }
+
+    const moderatorservice = new ModeratorService();
+    const model = await moderatorservice.FindById(id);
+    if (model === null) {
+      return {
+        response: `Not Model whit this Id ${id}`,
+        status: HTTP_RESPONSE.ACCEPTED,
+      };
+    }
+
+    moderatorservice.Update(
+      { _id: id },
+      {
+        isVerificate: Boolean(isV),
+      }
+    );
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: "Moderator Verificate",
     };
   }
 
-  @HttpMethods(false)
-  putModeratorVerify(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethodsFile()
+  async putModeratorImageVerificate({
+    file,
+    params,
+  }: InputHttpMethodsArgumentFile): Promise<ReturnMethod> {
+    const { id } = params;
+    const moderatorService: ModeratorService = new ModeratorService();
+    const moderator = await moderatorService.FindById(id);
+    if (moderator === null)
+      return {
+        response: "Not Model Whit this Id",
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      };
+    moderatorService.SavePhotoVerificated(file, moderator._id, (file) => {
+      console.log(file);
+    });
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: "Save Photo",
     };
   }
 
-  @HttpMethods(false)
-  putModeratorImageVerificate(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async deleteModerator({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id } = params;
+    const moderatorService = new ModeratorService();
+
+    const moderator = await moderatorService.FindById(id);
+    if (moderator === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: "Not Moderartor Whit this Id",
+      };
+    }
+
+    if (moderator.verificatePhoto) {
+      if (moderator.verificatePhoto.public_id !== "") {
+        return {
+          response: "Delete Images First VerificatePhoto",
+          status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        };
+      }
+    }
+
+    const deleting = await moderatorService.Delete(id);
+    const mdD: Partial<IModerator> = {
+      username: deleting.username,
+      name: deleting.name,
+      email: deleting.email,
+    };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: mdD,
     };
   }
 
-  @HttpMethods(false)
-  putModeratorAddModel(_input: InputHttpMethodsArgument): ReturnMethod {
-    return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
-    };
-  }
+  @HttpMethods()
+  async deleteImages({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { id } = params;
 
-  @HttpMethods(false)
-  deleteModerator(_input: InputHttpMethodsArgument): ReturnMethod {
+    let update: object = {
+      verificatePhoto: {
+        public_id: "",
+        secure_url: "",
+        url: "",
+        cl_type: "",
+        resource_type: "",
+      },
+    };
+
+    const moderatorservice = new ModeratorService();
+    const moderator = await moderatorservice.FindById(id);
+    if (moderator === null)
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: `Not Model Whit Id ${id}`,
+      };
+
+    if (moderator.verificatePhoto === undefined) {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: `Not VerifyImage en Moderator`,
+      };
+    }
+    if (moderator.verificatePhoto.public_id === "") {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: `Not VerifyImage en Model`,
+      };
+    }
+    const saveImageService = new SaveImageService();
+    saveImageService.deleteImage({
+      ids: [
+        {
+          ids: [moderator.verificatePhoto.public_id],
+          resource_type: moderator.verificatePhoto.resource_type,
+          type: moderator.verificatePhoto.cl_type,
+        },
+      ],
+    });
+
+    await moderatorservice.Update({ _id: id }, update);
+
     return {
-      status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      status: HTTP_RESPONSE.NO_ACCEPTABLE,
+      response: `Images of type VerifyImage Delete`,
     };
   }
 

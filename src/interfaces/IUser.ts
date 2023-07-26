@@ -6,9 +6,16 @@ export interface IUser {
   password: string;
   cc: string;
 }
+export interface AvatarType {
+  public_id: string;
+  secure_url: string;
+  url: string;
+  cl_type: string;
+  resource_type: string;
+}
 
 export interface IUserWAvatar extends IUser {
-  avatar?: string;
+  avatar?: AvatarType;
 }
 
 export const keysOfIUser = [
@@ -52,8 +59,34 @@ export const IUserSchema = {
 export const IUserSchemaWAvatar = {
   ...IUserSchema,
   avatar: {
-    type: String,
-    default: "",
+    type: {
+      public_id: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      secure_url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      cl_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      resource_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+    },
+    default: {},
   },
 };
 
@@ -68,5 +101,11 @@ export const UserDefault: IUser = {
 
 export const UserWAvatarDefault: IUserWAvatar = {
   ...UserDefault,
-  avatar: "",
+  avatar: {
+    public_id: "",
+    secure_url: "",
+    url: "",
+    cl_type: "",
+    resource_type: "",
+  },
 };

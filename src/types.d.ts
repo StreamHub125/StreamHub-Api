@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Logger } from "./class/Logger";
 import { HTTP_RESPONSE, METHODS_HTTP } from "./types.enum";
+import IImageService from "./interfaces/IImages";
 
 export type Interceptor = (req: Request, res: Response, next: Function) => void;
 
@@ -17,6 +18,49 @@ export interface ReturnMethod {
   response: Object | string | number | null;
 }
 
+export type MulterImage = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+  cloudinary?: any;
+};
+
+export type CloudinaryResponse = {
+  asset_id: string;
+  public_id: string;
+  version: number;
+  version_id: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;
+  tags: Array<String>;
+  bytes: number;
+  type: string;
+  etag: string;
+  placeholder: false;
+  url: string;
+  secure_url: string;
+  folder: string;
+  original_filename: string;
+  api_key: string;
+};
+
+export type DeleteImageProps = {
+  ids: Array<string>;
+  type: string;
+  resource_type: string;
+};
+
+export type SaveService = CloudinaryResponse;
+
 export interface InputHttpMethodsArgument {
   body: any;
   params: any;
@@ -27,14 +71,14 @@ export interface InputHttpMethodsArgumentFile {
   body: any;
   params: any;
   query: any;
-  file: any;
+  file: MulterImage;
 }
 
 export interface InputHttpMethodsArgumentFiles {
   body: any;
   params: any;
   query: any;
-  files: any;
+  files: MulterImage[];
 }
 
 export type InputHttpMethodsFile = Express.Multer.File;
@@ -160,3 +204,7 @@ export interface FissionTaskModel {
 /* Finish Types Node Media Server */
 
 export type VerifyIdUser = "admin" | "model" | "moderator" | "viewer";
+
+export type WID<T> = T & {
+  _id: string;
+};

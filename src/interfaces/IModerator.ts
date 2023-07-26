@@ -1,12 +1,18 @@
 import { Document } from "mongoose";
-import { IUser, IUserSchema, keysOfIUser } from "./IUser";
+import {
+  AvatarType,
+  IUser,
+  IUserSchema,
+  UserDefault,
+  keysOfIUser,
+} from "./IUser";
 
 export interface IModerator extends IUser {
-  models: string[];
   isVerificate: boolean;
-  verificatePhoto?: string;
+  verificatePhoto?: AvatarType;
   permissions: number;
-  isOwner: boolean;
+  admin: string;
+  // Is Owner For What??
 }
 
 export interface IModeratorM extends Omit<IModerator, "fn"> {}
@@ -14,33 +20,67 @@ export interface IModeratorModel extends Document, IModeratorM {}
 
 export const IModeratorSchema = {
   ...IUserSchema,
-  models: {
-    type: [String],
-    default: [],
-  },
   permissions: {
     type: Number,
     default: 1,
+  },
+  admin: {
+    type: String,
+    required: true,
   },
   isVerificate: {
     type: Boolean,
     default: false,
   },
-  isOwner: {
-    type: Boolean,
-    default: false,
-  },
   verificatePhoto: {
-    type: String,
-    required: false,
+    type: {
+      public_id: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      secure_url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      url: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      cl_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      resource_type: {
+        type: String,
+        required: false,
+        default: "",
+      },
+    },
+    default: {},
   },
 };
 
 export const keysOfIModerator = [
   ...keysOfIUser,
   "permissions",
-  "models",
-  "isOwner",
   "isVerificate",
   "verificatePhoto",
 ];
+
+export const ModeratorDefault: IModerator = {
+  ...UserDefault,
+  verificatePhoto: {
+    public_id: "",
+    secure_url: "",
+    url: "",
+    cl_type: "",
+    resource_type: "",
+  },
+  permissions: 1,
+  isVerificate: false,
+  admin: "",
+};

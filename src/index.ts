@@ -20,11 +20,17 @@ import TagRouter from "./controllers/Tag/TagRouter";
 import { viewerController } from "./controllers/Viewer/Viewer";
 import ViewerRouter from "./controllers/Viewer/ViewerRouter";
 import nms from "./services/streamService/serverstream";
-import { Claudinary, ENVIRONMENTS } from "./utils/const";
+import { ENVIRONMENTS } from "./utils/const";
 import DontEnv from "dotenv";
+import { v2 as cloudinary } from "cloudinary";
 
 DontEnv.config();
-Claudinary();
+
+cloudinary.config({
+  cloud_name: "ditexgqnk",
+  api_key: "493741955393776",
+  api_secret: "mN7Kt3ehlDO4oB0AWlCDxWYphhs",
+});
 const app: App = new App(
   ENVIRONMENTS.URL_MONGO_CONNECTION,
   ENVIRONMENTS.PORT,

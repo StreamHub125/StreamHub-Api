@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { moderatorController } from "./Moderator";
+import MulterInject from "../../utils/MulterImplementation";
 
 const ModeratorRouter: Router = Router();
+const Multer = new MulterInject({}, null);
 
 /* GET */
 ModeratorRouter.get(
@@ -11,10 +13,6 @@ ModeratorRouter.get(
 ModeratorRouter.get(
   moderatorController.pathGetModeratorById,
   moderatorController.getModeratorById
-);
-ModeratorRouter.get(
-  moderatorController.pathGetModeratorByVerificate,
-  moderatorController.getModeratorByVerificate
 );
 
 /* POST */
@@ -33,11 +31,8 @@ ModeratorRouter.put(
   moderatorController.putModeratorVerify
 );
 ModeratorRouter.put(
-  moderatorController.pathPutModeratorAddModel,
-  moderatorController.putModeratorAddModel
-);
-ModeratorRouter.put(
   moderatorController.pathPutModeratorImageVerificate,
+  Multer.multer.single("file"),
   moderatorController.putModeratorImageVerificate
 );
 
@@ -45,6 +40,10 @@ ModeratorRouter.put(
 ModeratorRouter.delete(
   moderatorController.pathDeleteModerator,
   moderatorController.deleteModerator
+);
+ModeratorRouter.delete(
+  moderatorController.pathDeleteImage,
+  moderatorController.deleteImages
 );
 
 export default ModeratorRouter;
