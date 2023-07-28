@@ -86,7 +86,7 @@ export class NodemailerService {
     });
   }
 
-  async sendInternalMailRejectMail(emails: any[]) {
+  private async sendInternalMailRejectMail(emails: any[]) {
     if (emails.length === 0 || emails.length < 0) {
       return;
     }
@@ -110,7 +110,7 @@ export class NodemailerService {
     });
   }
 
-  createHtmlFromEmailLinks(email: string): string {
+  private createHtmlFromEmailLinks(email: string): string {
     return `<a href="#">${email}</a>`;
   }
 

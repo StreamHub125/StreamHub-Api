@@ -5,6 +5,7 @@ import {
 } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import AdminService from "../services/AdminService";
+import CountMasterModelsService from "../services/CountMaster-Models";
 import ModelService from "../services/ModelService";
 import ModeratorService from "../services/ModeratorService";
 import ViewerService from "../services/ViewerService";
@@ -142,6 +143,7 @@ export async function VerifyIDOFUser(
     model: new ModelService(),
     moderator: new ModeratorService(),
     viewer: new ViewerService(),
+    countmaster: new CountMasterModelsService(),
   };
 
   switch (service) {
@@ -156,6 +158,9 @@ export async function VerifyIDOFUser(
 
     case "viewer":
       return await VerifyID(id, listService.viewer, "Viewer");
+
+    case "count-master":
+      return await VerifyID(id, listService.countmaster, "CountMaster");
 
     default:
       return null;

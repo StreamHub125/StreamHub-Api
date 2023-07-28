@@ -23,6 +23,8 @@ import nms from "./services/streamService/serverstream";
 import { ENVIRONMENTS } from "./utils/const";
 import DontEnv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
+import { countMasterModelsController } from "./controllers/CountMaster-Models/CountMaster-Models";
+import CountMasterModelsRouter from "./controllers/CountMaster-Models/CountMaster-ModelsRouter";
 
 DontEnv.config();
 
@@ -41,6 +43,8 @@ app.description(ENVIRONMENTS.DESCRIPTION_APPLICATION);
 
 // Admin Controller Import
 app.import(adminController, AdminRouter);
+// Coutn Master Controller Import
+app.import(countMasterModelsController, CountMasterModelsRouter);
 // Follow Controller Import
 app.import(followController, FollowRouter);
 // Gender Controller Import

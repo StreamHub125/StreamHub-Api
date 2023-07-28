@@ -228,7 +228,12 @@ export interface FissionTaskModel {
 }
 /* Finish Types Node Media Server */
 
-export type VerifyIdUser = "admin" | "model" | "moderator" | "viewer";
+export type VerifyIdUser =
+  | "admin"
+  | "model"
+  | "moderator"
+  | "viewer"
+  | "count-master";
 
 export type WID<T> = T & {
   _id: string;
