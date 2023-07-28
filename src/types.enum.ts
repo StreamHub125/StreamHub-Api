@@ -1,6 +1,9 @@
 export enum ROLES {
   USER = "user",
   ADMIN = "admin",
+  MODERATOR = "moderator",
+  MODEL = "model",
+  VIEWER = "view",
 }
 
 export enum EnumColorLogger {

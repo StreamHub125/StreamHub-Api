@@ -9,7 +9,7 @@ import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { IFollow } from "../../interfaces/IFollow";
 import FollowService from "../../services/FollowService";
-import { VerifyID, hasNextPaginate } from "../../utils/const";
+import { ErrorReturn, VerifyID, hasNextPaginate } from "../../utils/const";
 import ViewerService from "../../services/ViewerService";
 import ModelService from "../../services/ModelService";
 
@@ -170,10 +170,14 @@ export default class FollowController extends Controller<
 
     const service = new FollowService();
 
-    await service.Create({
+    const follow = await service.Create({
       idModel,
       idViewer,
     });
+
+    if (follow === null) {
+      return ErrorReturn("Follow");
+    }
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

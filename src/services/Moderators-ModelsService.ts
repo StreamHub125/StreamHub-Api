@@ -6,15 +6,19 @@ import ModeratorsModelSchema from "../schemas/Moderators-Models";
 export default class ModeratorsModelsService
   implements IService<IModeratorsModels>
 {
-  async Create(item: IModeratorsModels): Promise<IModeratorsModels> {
+  async Create(item: IModeratorsModels): Promise<IModeratorsModels | null> {
     const mms: IModeratorsModels = {
       ...item,
     };
 
-    const newMms = new ModeratorsModelSchema(mms);
-    const mmsCreate = await newMms.save();
+    try {
+      const newMms = new ModeratorsModelSchema(mms);
+      const mmsCreate = await newMms.save();
 
-    return mmsCreate;
+      return mmsCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(
     filter: object,

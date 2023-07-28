@@ -12,15 +12,19 @@ export default class ModelService implements IService<IModel> {
   constructor() {
     this.saveImageService = new SaveImageService();
   }
-  async Create(item: IModel): Promise<IModel> {
+  async Create(item: IModel): Promise<IModel | null> {
     const model: IModel = {
       ...item,
     };
 
-    const newModel = new ModelSchema(model);
-    const modelCreate = await newModel.save();
+    try {
+      const newModel = new ModelSchema(model);
+      const modelCreate = await newModel.save();
 
-    return modelCreate;
+      return modelCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IModel | null> {
     try {

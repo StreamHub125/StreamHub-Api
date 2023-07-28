@@ -20,3 +20,7 @@ export const IModeratorsModelsSchema = {
 };
 
 export const keysOfIModeratorsModels = ["idModerator", "idModel"];
+export const ModeratorsModelsDefault: IModeratorsModels = {
+  idModel: "***",
+  idModerator: "***",
+};

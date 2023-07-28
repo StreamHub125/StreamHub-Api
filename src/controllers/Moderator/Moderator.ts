@@ -11,7 +11,12 @@ import {
   WID,
 } from "../../types";
 import { Logger } from "../../utils/Logger";
-import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
+import {
+  EnumColorLogger,
+  HTTP_RESPONSE,
+  METHODS_HTTP,
+  ROLES,
+} from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import {
   IModerator,
@@ -19,11 +24,16 @@ import {
   keysOfIModerator,
 } from "../../interfaces/IModerator";
 import ModeratorService from "../../services/ModeratorService";
-import { VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
+import {
+  ErrorReturn,
+  VerifyIDOFUser,
+  hasNextPaginate,
+} from "../../utils/const";
 import { ConvertObj } from "../../utils/ConvertObj";
 import md5 from "md5";
 import { HttpMethodsFile } from "../../decorators/HttpMethodsFiles";
 import SaveImageService from "../../services/SaveImageService/SaveImageService";
+import AdminVerificatedService from "../../services/Admin-VerificatedService";
 
 export default class ModeratorController extends Controller<
   IModerator,
@@ -152,7 +162,11 @@ export default class ModeratorController extends Controller<
     const { id } = params;
     const { type, idUser } = body;
     const moderatorService = new ModeratorService();
-    if (type !== "admin" && type !== "model" && type !== "moderator") {
+    if (
+      type !== ROLES.ADMIN &&
+      type !== ROLES.MODEL &&
+      type !== ROLES.MODERATOR
+    ) {
       return {
         response: "T Not Accepte",
         status: HTTP_RESPONSE.ACCEPTED,
@@ -215,10 +229,9 @@ export default class ModeratorController extends Controller<
     params,
   }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const { idAdmin } = params;
-    const modelVeri = ConvertObj(
-      [...keysOfIModerator],
-      body
-    ) as Partial<IModerator>;
+    const fA = ["permissions", "admin"];
+    const kesy = keysOfIModerator.filter((e) => !fA.includes(e));
+    const modelVeri = ConvertObj([...kesy], body) as Partial<IModerator>;
 
     const us = await VerifyIDOFUser(idAdmin, "admin");
 
@@ -246,9 +259,11 @@ export default class ModeratorController extends Controller<
       admin: idAdmin,
     };
 
-    const moderatorcreate = (await service.Create(
-      modelComplete
-    )) as WID<IModerator>;
+    const mcs = (await service.Create(modelComplete)) as WID<IModerator>;
+    if (mcs === null) {
+      return ErrorReturn("Moderator");
+    }
+    const moderatorcreate = mcs as WID<IModerator>;
     const moderatorFilter: Partial<WID<IModerator>> = {
       _id: moderatorcreate._id,
       name: moderatorcreate.name,
@@ -257,6 +272,7 @@ export default class ModeratorController extends Controller<
       email: moderatorcreate.email,
       cc: moderatorcreate.cc,
       isVerificate: moderatorcreate.isVerificate,
+      verificatePhoto: moderatorcreate.verificatePhoto,
     };
     return {
       status: HTTP_RESPONSE.ACCEPTED,
@@ -357,6 +373,17 @@ export default class ModeratorController extends Controller<
         isVerificate: Boolean(isV),
       }
     );
+
+    const avs = new AdminVerificatedService();
+    const ing = await avs.Create({
+      idAdmin,
+      types: "model",
+      idUser: id,
+    });
+
+    if (ing === null) {
+      // Notificar
+    }
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

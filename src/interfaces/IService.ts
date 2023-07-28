@@ -1,5 +1,5 @@
 export default interface IService<Type> {
-  Create(_item: Type): Promise<Type>;
+  Create(_item: Type): Promise<Type | null>;
   /* objects need action for mongoose */
   /* Filter example {_id: 'cbkajbc'} and Update need partial of the type {nameProperty: valueOfProperty} */
   Update(_filter: object, _update: Partial<Type>): Promise<Type | null>;

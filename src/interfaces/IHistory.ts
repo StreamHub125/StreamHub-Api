@@ -59,3 +59,14 @@ export const keysOfIHistory = [
   "idGender",
   "idTag",
 ];
+
+export const HistoryDefault: IHistory = {
+  urlStream: "***",
+  hourInit: "***",
+  hourFinish: "***",
+  date: "***",
+  idModel: "***",
+  idModerator: "***",
+  idGender: "***",
+  idTag: "***",
+};

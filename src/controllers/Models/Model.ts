@@ -3,7 +3,12 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { Controller } from "../../abstract/Controller";
 import { ILoggerChild } from "../../interfaces/ILoggerChild";
-import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
+import {
+  EnumColorLogger,
+  HTTP_RESPONSE,
+  METHODS_HTTP,
+  ROLES,
+} from "../../types.enum";
 import { Logger } from "../../utils/Logger";
 import HttpMethods from "../../decorators/HttpMethods";
 import {
@@ -16,7 +21,11 @@ import {
 } from "../../types";
 import ModelService from "../../services/ModelService";
 import { IModel, ModelDefault, keysOfIModel } from "../../interfaces/IModel";
-import { VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
+import {
+  ErrorReturn,
+  VerifyIDOFUser,
+  hasNextPaginate,
+} from "../../utils/const";
 import { ConvertObj } from "../../utils/ConvertObj";
 import { UserWAvatarDefault, keysOfIUser } from "../../interfaces/IUser";
 import md5 from "md5";
@@ -29,6 +38,7 @@ import ImagesService from "../../services/ImagesService";
 import AdminService from "../../services/AdminService";
 import SaveImageService from "../../services/SaveImageService/SaveImageService";
 import ModeratorService from "../../services/ModeratorService";
+import AdminVerificatedService from "../../services/Admin-VerificatedService";
 
 export default class ModelController extends Controller<IModel, ModelService> {
   public readonly path = "/model";
@@ -111,6 +121,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
       plrs: false,
     },
   ];
+
   loggerController: Logger;
 
   constructor() {
@@ -153,7 +164,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
       };
     }
 
-    if (vAdmin === null) {
+    if (vAdmin !== null) {
       return {
         status: HTTP_RESPONSE.ACCEPTED,
         response: modelsWhitPageinate,
@@ -182,20 +193,20 @@ export default class ModelController extends Controller<IModel, ModelService> {
     const { client, idUser } = input.body;
     const service = new ModelService();
     if (
-      client !== "model" &&
-      client !== "moderator" &&
-      client !== "view" &&
-      client !== "admin"
+      client !== ROLES.MODEL &&
+      client !== ROLES.MODERATOR &&
+      client !== ROLES.VIEWER &&
+      client !== ROLES.ADMIN
     ) {
       return {
-        response: "Client not is acceptable",
+        response: "Type not is acceptable",
         status: HTTP_RESPONSE.NO_ACCEPTABLE,
       };
     }
 
     if (idUser === undefined || idUser === null) {
       return {
-        response: "idUser Required",
+        response: "id of User Required",
         status: HTTP_RESPONSE.NO_ACCEPTABLE,
       };
     }
@@ -216,7 +227,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
       avatar: model.avatar,
     };
 
-    if (client === "admin") {
+    if (client === ROLES.ADMIN) {
       const adminService = new AdminService();
       const user = await adminService.FindById(idUser);
       if (user === null) {
@@ -226,7 +237,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
         };
       }
       modelM = model;
-    } else if (client === "view") {
+    } else if (client === ROLES.VIEWER) {
       if (model.isVerificate === false) {
         return {
           status: HTTP_RESPONSE.ACCEPTED,
@@ -241,7 +252,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
           avatar: model.avatar,
         };
       }
-    } else if (client === "moderator") {
+    } else if (client === ROLES.MODERATOR) {
       const moderatorService = new ModeratorService();
       const mod = await moderatorService.FindById(idUser);
       if (mod === null) {
@@ -257,23 +268,17 @@ export default class ModelController extends Controller<IModel, ModelService> {
         tag: model.tag,
         avatar: model.avatar,
       };
-    } else if (client === "model") {
+    } else if (client === ROLES.MODEL) {
       if (id !== idUser) {
-        return {
-          response: "Your not this Model",
-          status: HTTP_RESPONSE.ACCEPTED,
+        modelM = {
+          _id: model._id,
+          username: model.username,
+          isVerificate: model.isVerificate,
+          gender: model.gender,
+          tag: model.tag,
         };
       }
-      modelM = {
-        name: model.name,
-        lastname: model.lastname,
-        username: model.username,
-        email: model.email,
-        cc: model.cc,
-        isVerificate: model.isVerificate,
-        gender: model.gender,
-        tag: model.tag,
-      };
+      modelM = model;
     }
 
     return {
@@ -313,16 +318,21 @@ export default class ModelController extends Controller<IModel, ModelService> {
     //   response: modelComplete,
     // };
 
-    const modelcreate = (await service.Create(modelComplete)) as WID<IModel>;
+    let modelcreate = await service.Create(modelComplete);
+    if (modelcreate === null) {
+      return ErrorReturn("Model");
+    }
+
+    const cmodelcreate = { ...modelcreate } as WID<IModel>;
     const modelFilter: Partial<WID<IModel>> = {
-      _id: modelcreate._id,
-      name: modelcreate.name,
-      lastname: modelcreate.lastname,
-      username: modelcreate.username,
-      email: modelcreate.email,
-      cc: modelcreate.cc,
-      gender: modelcreate.gender,
-      tag: modelcreate.tag,
+      _id: cmodelcreate._id,
+      name: cmodelcreate.name,
+      lastname: cmodelcreate.lastname,
+      username: cmodelcreate.username,
+      email: cmodelcreate.email,
+      cc: cmodelcreate.cc,
+      gender: cmodelcreate.gender,
+      tag: cmodelcreate.tag,
     };
     return {
       status: HTTP_RESPONSE.ACCEPTED,
@@ -358,12 +368,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
       };
     }
 
-    const modelUpdates: IModel = {
-      ...modelById,
-      ...modelVeri,
-    };
-
-    const modelUpdate = await service.Update({ _id: id }, modelUpdates);
+    const modelUpdate = await service.Update({ _id: id }, modelVeri);
 
     if (modelUpdate === null) {
       return {
@@ -487,6 +492,17 @@ export default class ModelController extends Controller<IModel, ModelService> {
         isVerificate: Boolean(isV),
       }
     );
+
+    const avs = new AdminVerificatedService();
+    const ing = await avs.Create({
+      idAdmin,
+      types: "model",
+      idUser: id,
+    });
+
+    if (ing === null) {
+      // Notificar
+    }
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

@@ -20,3 +20,8 @@ export const IFollowSchema = {
 };
 
 export const keysOfIFollow = ["idViewer", "idModel"];
+
+export const FollowDefault: IFollow = {
+  idModel: "***",
+  idViewer: "***",
+};

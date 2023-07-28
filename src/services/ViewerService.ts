@@ -5,15 +5,18 @@ import ViewerSchema from "../schemas/Viewer";
 
 export default class ViewerService implements IService<IViewer> {
   constructor() {}
-  async Create(item: IViewer): Promise<IViewer> {
+  async Create(item: IViewer): Promise<IViewer | null> {
     const viewer: IViewer = {
       ...item,
     };
 
-    const newViewer = new ViewerSchema(viewer);
-    const viewerCreate = await newViewer.save();
-
-    return viewerCreate;
+    try {
+      const newViewer = new ViewerSchema(viewer);
+      const viewerCreate = await newViewer.save();
+      return viewerCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IViewer | null> {
     try {

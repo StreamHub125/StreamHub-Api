@@ -9,7 +9,7 @@ import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
-import { VerifyID, hasNextPaginate } from "../../utils/const";
+import { ErrorReturn, VerifyID, hasNextPaginate } from "../../utils/const";
 import AdminService from "../../services/AdminService";
 import { ConvertObj } from "../../utils/ConvertObj";
 
@@ -142,6 +142,10 @@ export default class GenderController extends Controller<
 
     const service = new GenderService();
     const genderCreate = await service.Create(verifyBody as IGender);
+
+    if (genderCreate === null) {
+      return ErrorReturn("Gender");
+    }
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

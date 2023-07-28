@@ -8,7 +8,12 @@ import AdminService from "../services/AdminService";
 import ModelService from "../services/ModelService";
 import ModeratorService from "../services/ModeratorService";
 import ViewerService from "../services/ViewerService";
-import { ENVIRONMENTSTYPES, ReturnMethod, VerifyIdUser } from "../types";
+import {
+  ENVIRONMENTSTYPES,
+  ReturnMethod,
+  SaveService,
+  VerifyIdUser,
+} from "../types";
 import { HTTP_RESPONSE } from "../types.enum";
 import settings from "./json/stettings.json";
 import CloudinaryIm from "cloudinary";
@@ -92,6 +97,42 @@ export async function VerifyID<T, Type extends IService<T>>(
   return null;
 }
 
+export const saveServiceDefault: SaveService = {
+  asset_id: "***",
+  public_id: "***",
+  version: 0,
+  version_id: "***",
+  signature: "***",
+  width: 0,
+  height: 0,
+  format: "***",
+  resource_type: "***",
+  created_at: "***",
+  tags: [],
+  bytes: 0,
+  type: "***",
+  etag: "***",
+  placeholder: false,
+  url: "***",
+  secure_url: "***",
+  folder: "***",
+  original_filename: "***",
+  api_key: "***",
+};
+
+export function ErrorReturn(type: string, message?: string): ReturnMethod {
+  if (message !== undefined) {
+    return {
+      response: `Error creating ${type}`,
+      status: HTTP_RESPONSE.ACCEPTED,
+    };
+  }
+  return {
+    response: `${message} ${type}`,
+    status: HTTP_RESPONSE.ACCEPTED,
+  };
+}
+
 export async function VerifyIDOFUser(
   id: string,
   service: VerifyIdUser
@@ -135,6 +176,7 @@ export function hasNextPaginate<T extends PaginatedResult<any>>(
   if (obj === null) {
     return null;
   }
+  if (obj.docs.length === 0) return null;
   if (obj.hasPrevPage) {
     prevAndNext.nextUrlPage = `${getUrlPath()}${path}${url}?limit=${limit}&page=${
       page - 1

@@ -10,15 +10,19 @@ export default class ModeratorService implements IService<IModerator> {
   constructor() {
     this.saveImageService = new SaveImageService();
   }
-  async Create(item: IModerator): Promise<IModerator> {
+  async Create(item: IModerator): Promise<IModerator | null> {
     const moderator: IModerator = {
       ...item,
     };
 
-    const newModerator = new ModeratorSchema(moderator);
-    const moderatorCreate = await newModerator.save();
+    try {
+      const newModerator = new ModeratorSchema(moderator);
+      const moderatorCreate = await newModerator.save();
 
-    return moderatorCreate;
+      return moderatorCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IModerator | null> {
     try {

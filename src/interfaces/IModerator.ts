@@ -74,13 +74,13 @@ export const keysOfIModerator = [
 export const ModeratorDefault: IModerator = {
   ...UserDefault,
   verificatePhoto: {
-    public_id: "",
-    secure_url: "",
-    url: "",
-    cl_type: "",
-    resource_type: "",
+    public_id: "***",
+    secure_url: "***",
+    url: "***",
+    cl_type: "***",
+    resource_type: "***",
   },
   permissions: 1,
   isVerificate: false,
-  admin: "",
+  admin: "***",
 };

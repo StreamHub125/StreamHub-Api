@@ -79,16 +79,16 @@ export const keysOfIModel = [
 
 export const ModelDefault: IModel = {
   ...UserWAvatarDefault,
-  username: "",
+  username: "***",
   isVerificate: false,
   verificatePhoto: {
-    public_id: "",
-    secure_url: "",
-    url: "",
-    cl_type: "",
-    resource_type: "",
+    public_id: "***",
+    secure_url: "***",
+    url: "***",
+    cl_type: "***",
+    resource_type: "***",
   },
-  gender: "",
+  gender: "***",
   tag: [],
-  secret_key: "",
+  secret_key: "***",
 };

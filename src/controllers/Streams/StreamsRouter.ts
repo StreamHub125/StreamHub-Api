@@ -17,10 +17,6 @@ StreamsRouter.get(
   streamsController.getStreamsByModeratorId
 );
 StreamsRouter.get(
-  streamsController.pathGetStreamsByTagId,
-  streamsController.getStreamsByTagId
-);
-StreamsRouter.get(
   streamsController.pathGetStreamsByGenderId,
   streamsController.getStreamsByGenderId
 );

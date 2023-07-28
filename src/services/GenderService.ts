@@ -4,15 +4,19 @@ import IService from "../interfaces/IService";
 import GenderSchema from "../schemas/Gender";
 
 export default class GenderService implements IService<IGender> {
-  async Create(item: IGender): Promise<IGender> {
+  async Create(item: IGender): Promise<IGender | null> {
     const gender: IGender = {
       ...item,
     };
 
-    const newGender = new GenderSchema(gender);
-    const genderCreate = await newGender.save();
+    try {
+      const newGender = new GenderSchema(gender);
+      const genderCreate = await newGender.save();
 
-    return genderCreate;
+      return genderCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(
     filter: object,

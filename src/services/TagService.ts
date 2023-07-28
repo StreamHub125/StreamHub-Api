@@ -4,15 +4,19 @@ import { ITag } from "../interfaces/ITag";
 import TagSchema from "../schemas/Tag";
 
 export default class TagService implements IService<ITag> {
-  async Create(item: ITag): Promise<ITag> {
+  async Create(item: ITag): Promise<ITag | null> {
     const tag: ITag = {
       ...item,
     };
 
-    const newTag = new TagSchema(tag);
-    const tagCreate = await newTag.save();
+    try {
+      const newTag = new TagSchema(tag);
+      const tagCreate = await newTag.save();
 
-    return tagCreate;
+      return tagCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<ITag | null> {
     try {

@@ -4,15 +4,19 @@ import IService from "../interfaces/IService";
 import FollowSchema from "../schemas/Follow";
 
 export default class FollowService implements IService<IFollow> {
-  async Create(item: IFollow): Promise<IFollow> {
+  async Create(item: IFollow): Promise<IFollow | null> {
     const follow: IFollow = {
       ...item,
     };
 
-    const newFollow = new FollowSchema(follow);
-    const followCreate = await newFollow.save();
+    try {
+      const newFollow = new FollowSchema(follow);
+      const followCreate = await newFollow.save();
 
-    return followCreate;
+      return followCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(
     filter: object,

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Logger } from "./class/Logger";
 import { HTTP_RESPONSE, METHODS_HTTP } from "./types.enum";
 import IImageService from "./interfaces/IImages";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export type Interceptor = (req: Request, res: Response, next: Function) => void;
 
@@ -17,6 +18,30 @@ export interface ReturnMethod {
   status: HTTP_RESPONSE;
   response: Object | string | number | null;
 }
+
+export type SendEmailInfoReturn = SMTPTransport.SentMessageInfo;
+/**
+     * SendEmailInfoReturn MuckUp
+     * SendEmailInfoReturn: {
+            accepted: [ '1321@111.com', 'clanclskn@gcac.com' ],
+            rejected: [],
+            ehlo: [
+            'SIZE 35882577',
+            '8BITMIME',
+            'AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH',
+            'ENHANCEDSTATUSCODES',
+            'PIPELINING',
+            'CHUNKING',
+            'SMTPUTF8'
+            ],
+            envelopeTime: 536,
+            messageTime: 682,
+            messageSize: 407,
+            response: '250 2.0.0 OK  1690517236 x6-20020a05610223c600b004451f8ccf1csm418782vsr.11 - gsmtp',
+            envelope: { from: 'streamhub.con.fn@gmail.com', to: [Array] },
+            messageId: '<5a52b10e-9388-dcc1-055e-f9e26b10a57c@gmail.com>'
+        }
+     */
 
 export type MulterImage = {
   fieldname: string;

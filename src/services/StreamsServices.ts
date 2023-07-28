@@ -2,17 +2,22 @@ import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import { IStreams } from "../interfaces/IStreams";
 import StremasSchema from "../schemas/Streams";
+import { WID } from "../types";
 
 export default class StreamsService implements IService<IStreams> {
-  async Create(item: IStreams): Promise<IStreams> {
+  async Create(item: IStreams): Promise<IStreams | null> {
     const stream: IStreams = {
       ...item,
     };
 
-    const newStream = new StremasSchema(stream);
-    const streamCreate = await newStream.save();
+    try {
+      const newStream = new StremasSchema(stream);
+      const streamCreate = await newStream.save();
 
-    return streamCreate;
+      return streamCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IStreams | null> {
     try {
@@ -32,7 +37,7 @@ export default class StreamsService implements IService<IStreams> {
       return null;
     }
   }
-  async FindById(id: string): Promise<IStreams | null> {
+  async FindById(id: string): Promise<WID<IStreams> | null> {
     try {
       const stream = await StremasSchema.findById(id);
       return stream;

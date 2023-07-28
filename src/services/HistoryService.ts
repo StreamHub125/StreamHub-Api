@@ -4,15 +4,19 @@ import IService from "../interfaces/IService";
 import HistorySchema from "../schemas/History";
 
 export default class HistoryService implements IService<IHistory> {
-  async Create(item: IHistory): Promise<IHistory> {
+  async Create(item: IHistory): Promise<IHistory | null> {
     const history: IHistory = {
       ...item,
     };
 
-    const newHistory = new HistorySchema(history);
-    const historyCreate = await newHistory.save();
+    try {
+      const newHistory = new HistorySchema(history);
+      const historyCreate = await newHistory.save();
 
-    return historyCreate;
+      return historyCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IHistory | null> {
     try {

@@ -6,16 +6,20 @@ import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 
 export default class AdminService implements IService<IAdmin> {
   constructor() {}
-  async Create(item: IAdmin): Promise<IAdmin> {
+  async Create(item: IAdmin): Promise<IAdmin | null> {
     const admin: IAdmin = {
       ...item,
       password: md5(item.password),
     };
 
-    const newAdmin = new AdminSchema(admin);
-    const adminCreate = await newAdmin.save();
+    try {
+      const newAdmin = new AdminSchema(admin);
+      const adminCreate = await newAdmin.save();
 
-    return adminCreate;
+      return adminCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IAdmin | null> {
     try {

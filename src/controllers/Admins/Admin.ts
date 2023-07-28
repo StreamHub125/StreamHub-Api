@@ -11,7 +11,7 @@ import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
 import { ConvertObj } from "../../utils/ConvertObj";
 import md5 from "md5";
-import { VerifyID, hasNextPaginate } from "../../utils/const";
+import { ErrorReturn, VerifyID, hasNextPaginate } from "../../utils/const";
 
 export default class AdminController extends Controller<IAdmin, AdminService> {
   public readonly path: string = "/admin";
@@ -25,7 +25,7 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
   public readonly pathPostAdmin: string = "/:idAdmin";
 
   /* PUTS */
-  public readonly pathPutAdminById: string = "/:idAdmin/:idPut";
+  public readonly pathPutAdminById: string = "/update/:idAdmin/:idPut";
 
   /* DELETES */
   public readonly pathDeleteAdminById: string = "/:idAdmin/:idDelete";
@@ -134,17 +134,8 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     const service = new AdminService();
     const { idAdmin } = input.params;
     const adminVerify = await VerifyID(idAdmin, service, "Admin");
-    if (adminVerify) return adminVerify;
-
+    if (adminVerify !== null) return adminVerify;
     const { body } = input;
-    if (body.email) {
-      if (!input.body.email.includes("streamhub")) {
-        return {
-          status: HTTP_RESPONSE.NO_ACCEPTABLE,
-          response: "Email Not Validate",
-        };
-      }
-    }
 
     const admin = ConvertObj(keysOfAdmin, body) as Partial<IAdmin>;
     if (Object.keys(admin).length === 0) {
@@ -154,6 +145,16 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
       };
     }
 
+    if (admin.email) {
+      if (admin.email) {
+        if (!admin.email.includes("streamhub")) {
+          return {
+            status: HTTP_RESPONSE.NO_ACCEPTABLE,
+            response: "Email Not Validate",
+          };
+        }
+      }
+    }
     const password = admin.password ? admin.password : "";
 
     const adminComplete: IAdmin = {
@@ -163,6 +164,9 @@ export default class AdminController extends Controller<IAdmin, AdminService> {
     };
 
     const adminCreate = await service.Create(adminComplete);
+    if (adminCreate === null) {
+      return ErrorReturn("Admin");
+    }
     return {
       status: HTTP_RESPONSE.ACCEPTED,
       response: adminCreate,

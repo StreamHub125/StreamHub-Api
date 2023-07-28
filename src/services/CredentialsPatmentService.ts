@@ -6,15 +6,19 @@ import CredentialPaymentSchema from "../schemas/CredentialsPayment";
 export default class CredentialsPaymentService
   implements IService<ICredentialsPayment>
 {
-  async Create(item: ICredentialsPayment): Promise<ICredentialsPayment> {
+  async Create(item: ICredentialsPayment): Promise<ICredentialsPayment | null> {
     const cp: ICredentialsPayment = {
       ...item,
     };
 
-    const newCp = new CredentialPaymentSchema(cp);
-    const cpCreate = await newCp.save();
+    try {
+      const newCp = new CredentialPaymentSchema(cp);
+      const cpCreate = await newCp.save();
 
-    return cpCreate;
+      return cpCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(
     filter: object,

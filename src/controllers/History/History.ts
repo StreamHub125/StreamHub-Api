@@ -12,6 +12,7 @@ import HistoryService from "../../services/HistoryService";
 import { VerifyID, VerifyIDOFUser, hasNextPaginate } from "../../utils/const";
 import AdminService from "../../services/AdminService";
 
+// History is the stream
 export default class HistoryController extends Controller<
   IHistory,
   HistoryService

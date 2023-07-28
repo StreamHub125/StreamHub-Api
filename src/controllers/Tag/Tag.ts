@@ -9,6 +9,13 @@ import { InputHttpMethodsArgument, ROUTESLOG, ReturnMethod } from "../../types";
 import { Logger } from "../../utils/Logger";
 import { EnumColorLogger, HTTP_RESPONSE, METHODS_HTTP } from "../../types.enum";
 import HttpMethods from "../../decorators/HttpMethods";
+import {
+  ErrorReturn,
+  VerifyIDOFUser,
+  hasNextPaginate,
+} from "../../utils/const";
+import { ConvertObj } from "../../utils/ConvertObj";
+import { keysOfIGender } from "../../interfaces/IGender";
 
 export default class TagController extends Controller<ITag, TagService> {
   public readonly path: string = "/tag";
@@ -58,6 +65,7 @@ export default class TagController extends Controller<ITag, TagService> {
       plur: "Need a Admin Id for Delete a Tag",
     },
   ];
+
   loggerController: Logger;
   service: TagService;
   constructor() {
@@ -67,43 +75,146 @@ export default class TagController extends Controller<ITag, TagService> {
     this.addInterceptor();
   }
 
-  @HttpMethods(false)
-  getTags(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getTags({
+    query,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new TagService();
+    const limit = parseInt(query.limit) || 10;
+    const page = parseInt(query.page) || 1;
+    const pathComplete = body.pathComplete;
+    const genders = await service.Find(
+      {},
+      {
+        limit,
+        page,
+      }
+    );
+
+    const genderHNHA = hasNextPaginate(genders, pathComplete, "/", limit, page);
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: genderHNHA,
     };
   }
 
-  @HttpMethods(false)
-  getTagById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async getTagById({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const service = new TagService();
+    const { id } = params;
+    const gender = await service.FindById(id);
+
+    if (gender === null) {
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Tag By This ID = ${id}`,
+      };
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: gender,
     };
   }
 
-  @HttpMethods(false)
-  postTag(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async postTag({
+    params,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin } = params;
+
+    const verifyAdmin = await VerifyIDOFUser(idAdmin, "admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+
+    const verifyBody = ConvertObj(keysOfIGender, body) as ITag;
+
+    if (Object.keys(verifyBody).length === 0) {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response:
+          "Data in body not is the type Tag type please Verify you request",
+      };
+    }
+
+    if (!verifyBody.description || !verifyBody.name)
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response: "Need All Properties",
+      };
+
+    const service = new TagService();
+    const tagCreate = await service.Create(verifyBody);
+
+    if (tagCreate === null) {
+      return ErrorReturn("Tag");
+    }
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: tagCreate,
     };
   }
 
-  @HttpMethods(false)
-  putTagById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async putTagById({
+    params,
+    body,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin, id } = params;
+
+    const verifyAdmin = await VerifyIDOFUser(idAdmin, "admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+    const verifyBody = ConvertObj(keysOfIGender, body);
+
+    if (Object.keys(verifyBody).length === 0) {
+      return {
+        status: HTTP_RESPONSE.NO_ACCEPTABLE,
+        response:
+          "Data in body not is the type Tag type please Verify you request",
+      };
+    }
+
+    const service = new TagService();
+    const tagUpdate = await service.Update({ _id: id }, verifyBody);
+
+    if (tagUpdate === null)
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Tag by this Id ${id}`,
+      };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: tagUpdate,
     };
   }
 
-  @HttpMethods(false)
-  deleteTagById(_input: InputHttpMethodsArgument): ReturnMethod {
+  @HttpMethods()
+  async deleteTagById({
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
+    const { idAdmin, id } = params;
+
+    const verifyAdmin = await VerifyIDOFUser(idAdmin, "admin");
+    if (verifyAdmin !== null) return verifyAdmin;
+
+    const service = new TagService();
+    const tagUpdate = await service.Delete(id);
+
+    if (tagUpdate === null)
+      return {
+        status: HTTP_RESPONSE.NO_CONTENT,
+        response: `Not Tag by this Id ${id}`,
+      };
+
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: "",
+      response: tagUpdate,
     };
   }
 

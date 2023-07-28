@@ -91,21 +91,21 @@ export const IUserSchemaWAvatar = {
 };
 
 export const UserDefault: IUser = {
-  name: "",
-  lastname: "",
-  username: "",
-  email: "",
-  password: "",
-  cc: "",
+  name: "***",
+  lastname: "***",
+  username: "***",
+  email: "***",
+  password: "***",
+  cc: "***",
 };
 
 export const UserWAvatarDefault: IUserWAvatar = {
   ...UserDefault,
   avatar: {
-    public_id: "",
-    secure_url: "",
-    url: "",
-    cl_type: "",
-    resource_type: "",
+    public_id: "***",
+    secure_url: "***",
+    url: "***",
+    cl_type: "***",
+    resource_type: "***",
   },
 };

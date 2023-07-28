@@ -4,15 +4,19 @@ import IService from "../interfaces/IService";
 import CountMasterSchema from "../schemas/CountMaster";
 
 export default class CountMasterService implements IService<ICountMaster> {
-  async Create(item: ICountMaster): Promise<ICountMaster> {
+  async Create(item: ICountMaster): Promise<ICountMaster | null> {
     const cm: ICountMaster = {
       ...item,
     };
 
-    const newCm = new CountMasterSchema(cm);
-    const cmCreate = await newCm.save();
+    try {
+      const newCm = new CountMasterSchema(cm);
+      const cmCreate = await newCm.save();
 
-    return cmCreate;
+      return cmCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<ICountMaster | null> {
     try {

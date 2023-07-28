@@ -4,15 +4,19 @@ import IService from "../interfaces/IService";
 import ImagesSchema from "../schemas/Images";
 
 export default class ImagesService implements IService<IImages> {
-  async Create(item: IImages): Promise<IImages> {
+  async Create(item: IImages): Promise<IImages | null> {
     const cm: IImages = {
       ...item,
     };
 
-    const newIm = new ImagesSchema(cm);
-    const imCreate = await newIm.save();
+    try {
+      const newIm = new ImagesSchema(cm);
+      const imCreate = await newIm.save();
 
-    return imCreate;
+      return imCreate;
+    } catch (error) {
+      return null;
+    }
   }
   async Update(filter: object, update: object): Promise<IImages | null> {
     try {

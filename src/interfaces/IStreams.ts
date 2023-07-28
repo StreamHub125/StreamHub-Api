@@ -8,7 +8,7 @@ export interface IStreams {
   idModerator: string;
   isLive: boolean;
   idGender: string;
-  idTag: string;
+  idTag: Array<string>;
   date: string;
 }
 
@@ -26,6 +26,7 @@ export const IStreamsSchema = {
   },
   hourFinish: {
     type: String,
+    required: false,
     default: "",
   },
   date: {
@@ -49,7 +50,7 @@ export const IStreamsSchema = {
     required: true,
   },
   idTag: {
-    type: String,
+    type: [String],
     required: true,
   },
 };
@@ -64,3 +65,15 @@ export const keysOfIStreams = [
   "idGender",
   "idTag",
 ];
+
+export const StreamsDefault: IStreams = {
+  urlStream: "***",
+  hourInit: "***",
+  hourFinish: "***",
+  idModel: "***",
+  idModerator: "***",
+  isLive: false,
+  idGender: "***",
+  idTag: [],
+  date: "***",
+};

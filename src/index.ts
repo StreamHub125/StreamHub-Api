@@ -27,10 +27,11 @@ import { v2 as cloudinary } from "cloudinary";
 DontEnv.config();
 
 cloudinary.config({
-  cloud_name: "ditexgqnk",
-  api_key: "493741955393776",
-  api_secret: "mN7Kt3ehlDO4oB0AWlCDxWYphhs",
+  cloud_name: process.env.CLOUDINARY_CLOUDNAME,
+  api_key: process.env.CLOUDINARY_APIKEY,
+  api_secret: process.env.CLOUDINARY_APISECRET,
 });
+
 const app: App = new App(
   ENVIRONMENTS.URL_MONGO_CONNECTION,
   ENVIRONMENTS.PORT,
@@ -38,26 +39,26 @@ const app: App = new App(
 );
 app.description(ENVIRONMENTS.DESCRIPTION_APPLICATION);
 
-// Model Controller Import
-app.import(modelController, ModelRouter);
 // Admin Controller Import
 app.import(adminController, AdminRouter);
+// Follow Controller Import
+app.import(followController, FollowRouter);
 // Gender Controller Import
 app.import(genderController, genderRouter);
+// History Controller Import
+app.import(historyController, HistoryRouter);
+// Model Controller Import
+app.import(modelController, ModelRouter);
+// Moderator Controller Import
+app.import(moderatorController, ModeratorRouter);
+// Moderators Models Controller Import
+app.import(moderatorsModelsController, ModeratorsModelRouter);
+// Streams Controller Import
+app.import(streamsController, StreamsRouter);
 // Tag Controller Import
 app.import(tagController, TagRouter);
 // Viewer Controller Import
 app.import(viewerController, ViewerRouter);
-// Moderator Controller Import
-app.import(moderatorController, ModeratorRouter);
-// Follow Controller Import
-app.import(followController, FollowRouter);
-// Moderators Models Controller Import
-app.import(moderatorsModelsController, ModeratorsModelRouter);
-// History Controller Import
-app.import(historyController, HistoryRouter);
-// Streams Controller Import
-app.import(streamsController, StreamsRouter);
 
 app.init();
 

@@ -1,5 +1,6 @@
 import { Document } from "mongoose";
 import { SaveService } from "../types";
+import { saveServiceDefault } from "../utils/const";
 
 export interface IImages {
   idModel: string;
@@ -22,3 +23,8 @@ export const IImagesSchema = {
 };
 
 export const keysOfIImages = ["idModel", "saveService"];
+
+export const ImagesDefault: IImages = {
+  idModel: "***",
+  saveService: saveServiceDefault,
+};
