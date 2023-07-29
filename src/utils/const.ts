@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   HasNextPaginate,
   PaginatedResult,
@@ -119,6 +120,10 @@ export const saveServiceDefault: SaveService = {
   folder: "***",
   original_filename: "***",
   api_key: "***",
+};
+
+export const CodeGenerator = (vd: string) => {
+  return `6s4${vd}d45${randomUUID().replaceAll("-", "")}`;
 };
 
 export function ErrorReturn(type: string, message?: string): ReturnMethod {

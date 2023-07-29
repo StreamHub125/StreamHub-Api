@@ -4,6 +4,7 @@ export enum ROLES {
   MODERATOR = "moderator",
   MODEL = "model",
   VIEWER = "view",
+  COUNTMASTER = "count-master",
 }
 
 export enum EnumColorLogger {

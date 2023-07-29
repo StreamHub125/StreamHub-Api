@@ -2,6 +2,7 @@ import { ICountMasterModels } from "../interfaces/ICountMaster-Models";
 import { PaginatedResult } from "../interfaces/IDocumentsResponse";
 import IService from "../interfaces/IService";
 import CountMasterModelsSchema from "../schemas/CountMaster-Models";
+import { WID } from "../types";
 
 export default class CountMasterModelsService
   implements IService<ICountMasterModels>
@@ -44,7 +45,7 @@ export default class CountMasterModelsService
       return null;
     }
   }
-  async FindById(id: string): Promise<ICountMasterModels | null> {
+  async FindById(id: string): Promise<WID<ICountMasterModels> | null> {
     try {
       const mms = await CountMasterModelsSchema.findById(id);
       return mms;
@@ -58,6 +59,17 @@ export default class CountMasterModelsService
   ): Promise<PaginatedResult<ICountMasterModels> | null> {
     try {
       const mms = await CountMasterModelsSchema.paginate(query, set);
+      return mms;
+    } catch (error) {
+      return null;
+    }
+  }
+  async FindByCode(code: string): Promise<any> {
+    try {
+      const mms = await CountMasterModelsSchema.find({ code });
+      if (mms === null) {
+        return null;
+      }
       return mms;
     } catch (error) {
       return null;

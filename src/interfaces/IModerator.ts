@@ -12,7 +12,6 @@ export interface IModerator extends IUser {
   verificatePhoto?: AvatarType;
   permissions: number;
   admin: string;
-  // Is Owner For What??
 }
 
 export interface IModeratorM extends Omit<IModerator, "fn"> {}

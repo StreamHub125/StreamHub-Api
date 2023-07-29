@@ -277,8 +277,9 @@ export default class ModelController extends Controller<IModel, ModelService> {
           gender: model.gender,
           tag: model.tag,
         };
+      } else {
+        modelM = model;
       }
-      modelM = model;
     }
 
     return {

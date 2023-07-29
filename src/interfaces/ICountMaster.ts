@@ -5,7 +5,6 @@ export interface ICountMaster {
   idModeratorOwner: string;
   email: string;
   password: string;
-  idModel: string[];
   idCrendentialPayment: string;
 }
 
@@ -29,10 +28,6 @@ export const ICountMasterSchema = {
     type: String,
     required: true,
   },
-  idModel: {
-    type: [String],
-    required: true,
-  },
   idCrendentialPayment: {
     type: String,
     required: true,
@@ -44,6 +39,13 @@ export const keysOfICountMaster = [
   "idModeratorOwner",
   "email",
   "password",
-  "idModel",
   "idCrendentialPayment",
 ];
+
+export const CountMasterDefault: ICountMaster = {
+  companyName: "***",
+  idModeratorOwner: "***",
+  email: "***",
+  password: "***",
+  idCrendentialPayment: "***",
+};

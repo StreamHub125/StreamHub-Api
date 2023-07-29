@@ -18,11 +18,19 @@ CountMasterModelsRouter.post(
   countMasterModelsController.pathPostSubscribe,
   countMasterModelsController.postSubscribe
 );
+CountMasterModelsRouter.post(
+  countMasterModelsController.pathPostSubscribeConfirm,
+  countMasterModelsController.postSubscribeConfirm
+);
 
 /* DELETE */
 CountMasterModelsRouter.delete(
   countMasterModelsController.pathDeleteUnsubscribe,
   countMasterModelsController.deleteUnsubscribe
+);
+CountMasterModelsRouter.delete(
+  countMasterModelsController.pathDeleteUnsubscribeConfirm,
+  countMasterModelsController.deleteUnsubscribeConfirm
 );
 
 export default CountMasterModelsRouter;

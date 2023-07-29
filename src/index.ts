@@ -25,6 +25,8 @@ import DontEnv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { countMasterModelsController } from "./controllers/CountMaster-Models/CountMaster-Models";
 import CountMasterModelsRouter from "./controllers/CountMaster-Models/CountMaster-ModelsRouter";
+import CountMasterRouter from "./controllers/CountMaster/CountMasterRouter";
+import { countMasterController } from "./controllers/CountMaster/CountMaster";
 
 DontEnv.config();
 
@@ -33,9 +35,9 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_APIKEY,
   api_secret: process.env.CLOUDINARY_APISECRET,
 });
-
+//ENVIRONMENTS.URL_MONGO_CONNECTION,
 const app: App = new App(
-  ENVIRONMENTS.URL_MONGO_CONNECTION,
+  process.env.MONGODB_LOCAL ?? ENVIRONMENTS.URL_MONGO_CONNECTION,
   ENVIRONMENTS.PORT,
   `/api-v${ENVIRONMENTS.VERSION_APPLICATION}`
 );
@@ -44,6 +46,8 @@ app.description(ENVIRONMENTS.DESCRIPTION_APPLICATION);
 // Admin Controller Import
 app.import(adminController, AdminRouter);
 // Coutn Master Controller Import
+app.import(countMasterController, CountMasterRouter);
+// Coutn Master Models Controller Import
 app.import(countMasterModelsController, CountMasterModelsRouter);
 // Follow Controller Import
 app.import(followController, FollowRouter);

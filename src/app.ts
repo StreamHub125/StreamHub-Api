@@ -43,6 +43,7 @@ export default class App {
       .catch((e) => {
         loggerApp.Error("Connection to Mongo DB Unsuccessful");
         loggerApp.Error(e);
+        //TODO: Enviar Email De Caida Base de datos tambien al personal
       });
 
     // Active Server

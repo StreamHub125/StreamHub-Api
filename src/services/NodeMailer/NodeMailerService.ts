@@ -77,9 +77,15 @@ export class NodemailerService {
     this.sendInternalMailRejectMail(info.rejected);
   }
 
-  async sendInternalMail(subject: string) {
+  async sendInternalMail(subject: string, emails?: string[]) {
+    let emailsSend = process.env.GMAIL_AUTH_EMAIL;
+    if (emails !== undefined) {
+      emails.forEach((e) => {
+        emailsSend = emails + `, ${e}`;
+      });
+    }
     await this.transporter.sendMail({
-      from: `"${subject}" <${process.env.GMAIL_AUTH_EMAIL}>`, // sender address
+      from: `"${subject}" <${emailsSend}>`, // sender address
       to: process.env.INTERNAL_EMAIL_NOTIFICATION, // list of receivers
       subject, // Subject line
       html: "<b>Hello world?</b>", // html body

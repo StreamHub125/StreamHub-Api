@@ -60,4 +60,13 @@ export default class ModeratorsModelsService
       return null;
     }
   }
+
+  async FindByModerator(id: string): Promise<any> {
+    try {
+      const mms = await ModeratorsModelSchema.find({ idModerator: id });
+      return mms;
+    } catch (error) {
+      return null;
+    }
+  }
 }
