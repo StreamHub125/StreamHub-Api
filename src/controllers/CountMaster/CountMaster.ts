@@ -131,8 +131,15 @@ export default class CountMasterController extends Controller<
     const { pathComplete, query } = input.body;
     const { idAdmin } = input.params;
 
-    const queryVerify = ConvertObj(keysOfICountMaster, query ? query : {});
     const vAdmin = await VerifyIDOFUser(idAdmin, "admin");
+
+    if (vAdmin !== null) {
+      return {
+        status: HTTP_RESPONSE.ACCEPTED,
+        response: "Not Admin whit this Id",
+      };
+    }
+    const queryVerify = ConvertObj(keysOfICountMaster, query ? query : {});
     const countMasters = await countService.Find(queryVerify, {
       limit,
       page,
@@ -141,7 +148,7 @@ export default class CountMasterController extends Controller<
     const countMasterWhitPageinate = hasNextPaginate(
       countMasters,
       pathComplete,
-      `/${idAdmin}/`,
+      `/${idAdmin}`,
       limit,
       page
     );
@@ -150,13 +157,6 @@ export default class CountMasterController extends Controller<
       return {
         response: "Not CountsMasters",
         status: HTTP_RESPONSE.NO_CONTENT,
-      };
-    }
-
-    if (vAdmin === null) {
-      return {
-        status: HTTP_RESPONSE.ACCEPTED,
-        response: "Not Admin whit this Id",
       };
     }
 
@@ -180,24 +180,32 @@ export default class CountMasterController extends Controller<
       };
     }
 
-    if (idUser === undefined || idUser === null) {
-      return {
-        response: "id of User Required",
-        status: HTTP_RESPONSE.NO_ACCEPTABLE,
-      };
-    }
-
     const countMaster = (await service.FindById(id)) as WID<ICountMaster>;
     if (countMaster === null) {
       return {
-        response: `Not Model whit this id: ${id}`,
+        response: `Not Count Master whit this id: ${id}`,
         status: HTTP_RESPONSE.NO_CONTENT,
       };
     }
-    let countMasterM: Partial<WID<ICountMaster>> = countMaster;
+    let countMasterM: WID<Partial<ICountMaster>> = countMaster;
 
     if (client === ROLES.MODEL) {
       if (id !== idUser) {
+        if (idUser === undefined || idUser === null) {
+          return {
+            response: "id of User Required",
+            status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          };
+        }
+        const model = await VerifyIDOFUser(idUser, "model");
+
+        if (model !== null) {
+          return {
+            response: "There is no model with that id",
+            status: HTTP_RESPONSE.NO_ACCEPTABLE,
+          };
+        }
+
         countMasterM = {
           _id: countMaster._id,
           email: countMaster.email,
@@ -219,12 +227,34 @@ export default class CountMasterController extends Controller<
     const { body } = input;
 
     const countMasterVeri = ConvertObj(
-      [...keysOfICountMaster],
+      [
+        ...keysOfICountMaster.filter(
+          (e) =>
+            ![
+              "idModeratorOwner",
+              "idCrendentialPayment",
+              "permissions",
+              "isVerificate",
+              "verificatePhoto",
+              "admin",
+            ].includes(e)
+        ),
+      ],
       body
     ) as Partial<ICountMaster>;
 
     const moderatorVeri = ConvertObj(
-      [...keysOfIModerator],
+      [
+        ...keysOfIModerator.filter(
+          (e) =>
+            ![
+              "permissions",
+              "isVerificate",
+              "verificatePhoto",
+              "admin",
+            ].includes(e)
+        ),
+      ],
       body
     ) as Partial<IModerator>;
 
@@ -241,17 +271,20 @@ export default class CountMasterController extends Controller<
         status: HTTP_RESPONSE.NO_CONTENT,
       };
     }
+    if (countMasterVeri.password === undefined) {
+      return ErrorReturn("CountMaster", "Need Password");
+    }
     const service = new CountMasterService();
     const serviceModerator = new ModeratorService();
 
-    const password = countMasterVeri.password
-      ? md5(countMasterVeri.password)
-      : "";
+    const password = md5(countMasterVeri.password);
 
     const moderatorComplete: IModerator = {
       ...ModeratorDefault,
       ...moderatorVeri,
       password,
+      isVerificate: true,
+      permissions: 0,
     };
 
     let moderatorcreate = (await serviceModerator.Create(
@@ -280,8 +313,10 @@ export default class CountMasterController extends Controller<
   }
 
   @HttpMethods()
-  async putCountMaster(input: InputHttpMethodsArgument): Promise<ReturnMethod> {
-    const { body, params } = input;
+  async putCountMaster({
+    body,
+    params,
+  }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const { id } = params;
 
     const countMasterVeri = ConvertObj(
@@ -292,6 +327,11 @@ export default class CountMasterController extends Controller<
       ],
       body
     ) as Partial<ICountMaster>;
+
+    const moderatorVerify = ConvertObj(
+      ["email", "password"],
+      body
+    ) as Partial<IModerator>;
 
     if (Object.keys(countMasterVeri).length === 0) {
       return {
@@ -311,16 +351,28 @@ export default class CountMasterController extends Controller<
       };
     }
 
+    if (countMasterVeri.password) {
+      const password = md5(countMasterVeri.password);
+      countMasterVeri.password = password;
+      moderatorVerify.password = password;
+    }
+
     const countmasterUpdate = await service.Update(
       { _id: id },
       countMasterVeri
     );
 
     if (countmasterUpdate === null) {
-      return {
-        status: HTTP_RESPONSE.NO_CONTENT,
-        response: "Not Count Master Whit This Id",
-      };
+      return ErrorReturn("CountMaster", "Not Count Master Whit This Id");
+    }
+
+    if (Object.keys(moderatorVerify).length > 0) {
+      const moderatorService = await new ModeratorService().Update(
+        { _id: countmaster.idModeratorOwner },
+        moderatorVerify
+      );
+      if (moderatorService === null)
+        return ErrorReturn("CountMaster", "The moderator not update");
     }
 
     return {
@@ -356,12 +408,12 @@ export default class CountMasterController extends Controller<
       types: CODETYPE.COUNTMASTER,
       doc: {
         id,
+        idModerator: countmaster.idModeratorOwner,
       },
     });
 
-    console.log({ code });
-
-    // Send Email
+    console.log(code);
+    //TODO: Send Email
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
@@ -374,7 +426,6 @@ export default class CountMasterController extends Controller<
     params,
   }: InputHttpMethodsArgument): Promise<ReturnMethod> {
     const { code } = params;
-    const countMasterService = new CountMasterService();
     const codeService = new CodeService();
 
     const codes = (await codeService.FindByCode(code)) as WID<ICode> | null;
@@ -389,11 +440,12 @@ export default class CountMasterController extends Controller<
       return ErrorReturn("CountMaster", "This Code not is for Deleting");
     }
 
-    const deleting = await countMasterService.Delete(codes.doc.id);
+    await new ModeratorService().Delete(codes.doc.idModerator);
+    await new CountMasterService().Delete(codes.doc.id);
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,
-      response: deleting,
+      response: "Deleting Count Master and Moderator Associate",
     };
   }
 
@@ -405,7 +457,7 @@ export default class CountMasterController extends Controller<
     path: string
   ): void {
     interceptorLogger.LogChild(
-      "Model-Controller",
+      "CountMaster-Controller",
       `Execute Interceptor of ${path.toUpperCase()}`
     );
     next();

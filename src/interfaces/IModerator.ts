@@ -68,6 +68,7 @@ export const keysOfIModerator = [
   "permissions",
   "isVerificate",
   "verificatePhoto",
+  "admin",
 ];
 
 export const ModeratorDefault: IModerator = {

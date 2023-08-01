@@ -91,7 +91,7 @@ export default class GenderController extends Controller<
       }
     );
 
-    const genderHNHA = hasNextPaginate(genders, pathComplete, "/", limit, page);
+    const genderHNHA = hasNextPaginate(genders, pathComplete, "", limit, page);
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

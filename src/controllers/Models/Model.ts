@@ -152,7 +152,7 @@ export default class ModelController extends Controller<IModel, ModelService> {
     const modelsWhitPageinate = hasNextPaginate(
       models,
       pathComplete,
-      "/",
+      "",
       limit,
       page
     );

@@ -129,7 +129,7 @@ export default class StreamsController extends Controller<
     const streamsHasNext = hasNextPaginate(
       streams,
       pathComplete,
-      "/",
+      "",
       limit,
       page
     );

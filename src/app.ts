@@ -48,8 +48,8 @@ export default class App {
 
     // Active Server
     this.app.listen(this.PORT, () => {
-      loggerApp.Log(`Server in PORT = ${this.PORT}, api = ${this.NAME_API}`);
-      loggerApp.Log(`Route = ${getUrlPath()}`);
+      loggerApp.Log(`Server in PORT = ${this.PORT}, API = ${this.NAME_API}`);
+      loggerApp.Log(`ROUTE = ${getUrlPath()}`);
     });
   }
 
@@ -57,11 +57,11 @@ export default class App {
     loggerApp.LogChild("Description", description);
   }
 
-  /*
-   * Function to Import to Server Routes
-   * @param name: String
-   * @param route: Route
-   * @Return void
+  /**
+   * Import to Controller in app
+   * @param controller Type Controller
+   * @param route Type Router Express
+   * @returns Void
    */
   import(controller: Controller<any, IService<any>>, route: Router): void {
     let path = `${this.NAME_API}${controller.path}`;

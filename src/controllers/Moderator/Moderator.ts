@@ -136,7 +136,7 @@ export default class ModeratorController extends Controller<
     const moderatorWhitPageinate = hasNextPaginate(
       moderator,
       pathComplete,
-      "/",
+      "",
       limit,
       page
     );

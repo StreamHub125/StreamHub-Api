@@ -92,7 +92,7 @@ export default class TagController extends Controller<ITag, TagService> {
       }
     );
 
-    const genderHNHA = hasNextPaginate(genders, pathComplete, "/", limit, page);
+    const genderHNHA = hasNextPaginate(genders, pathComplete, "", limit, page);
 
     return {
       status: HTTP_RESPONSE.ACCEPTED,

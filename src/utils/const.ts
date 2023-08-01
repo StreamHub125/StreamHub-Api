@@ -172,9 +172,19 @@ export async function VerifyIDOFUser(
   }
 }
 
+/**
+ * Function that checks if pagination is necessary
+ *
+ * @param {PaginatedResult} obj It has to extend from PaginatedResult
+ * @param {String} path You can get the Path from the pathComplete that the interceptor gives you in the body
+ * @param {String} url This parameter must end without "/" for the formation of the query
+ * @param {Number} limit Limit Actual
+ * @param {Number} page Number to page Actual
+ * @returns {HasNextPaginate}
+ */
 export function hasNextPaginate<T extends PaginatedResult<any>>(
   obj: T | null,
-  path: string, //  /model/${id}
+  path: string,
   url: string,
   limit: number,
   page: number
